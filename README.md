@@ -19,7 +19,7 @@ Génère un rapport HTML avec un score de sécurité global.
 ```
 ## Cloner le projet
 ```bash
-    git clone https://github.com/flapassrck/projet_audit.git
+    git clone https://github.com/flapassrck/linux-security-auditor
     cd projet_audit
 ```
 
