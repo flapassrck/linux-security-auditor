@@ -1,73 +1,87 @@
-# Auditeur de sécurité Linux
+# Linux Security Auditor
+
 Script Python d'audit de sécurité pour serveurs Linux.
 Génère un rapport HTML avec un score de sécurité global.
 
-#   Prérequis
+## Prérequis
+
 - Python 3
-- Serveur Linux (Ubuntu, CentOS...)
+- Serveur Linux (CentOS, Ubuntu...)
 - Droits sudo
 
-#   Installation
-## Installer git
-### Sur Ubuntu :
-```bash
+## Installation
+
+### 0. Installer git
+
+Sur Ubuntu :
+
     sudo apt install git -y
-```
-### Sur CentOS :
-```bash
+
+Sur CentOS :
+
     sudo yum install git -y
-```
-## Cloner le projet
-```bash
-    git clone https://github.com/flapassrck/linux-security-auditor
-```
-puis
-```bash
+
+### 1. Cloner le projet
+
+    git clone https://github.com/ton_pseudo/linux-security-auditor.git
     cd linux-security-auditor
-```
-#   Installer pip3
-### Sur Ubuntu :
-```bash
-    sudo apt install python3-pip -y
-```
-### Sur CentOS :
-```bash
+
+### 2. Installer pip3
+
+Sur Ubuntu :
+
+    sudo apt install python3-pip --fix-missing -y
+
+Sur CentOS :
+
     sudo yum install python3-pip -y
-```
 
-#   Installer les dépendances
-```bash
+### 3. Installer les dépendances
+
+Sur Ubuntu :
+
+    sudo pip3 install -r requirements.txt --break-system-packages
+
+Sur CentOS :
+
     sudo pip3 install -r requirements.txt
-```
 
-#   Utilisation
-```bash
+## Utilisation
+
+Se placer dans le dossier du projet :
+
+    cd linux-security-auditor
+
+Lancer le script :
+
     sudo python3 audit.py
-```
 
-Le rapport rapport_audit.html est généré dans le dossier projet_audit.
+Le rapport rapport_audit.html est généré dans le dossier du projet.
 
-#   Exporter le rapport sur Windows
-## Option 1 — SCP
-```bash
-    scp utilisateur@192.168.x.x:/home/username/linux-security-auditor/rapport_audit.html C:\Users\username\Desktop\
-```
-## Option 2 — VS Code Remote SSH
-1. Clic droit sur rapport_audit.html dans l'explorateur VS Code
-2. Cliquer sur Download
-3. Ouvrir le fichier dans le navigateur
+## Récupérer le rapport sur Windows
 
-#   Ce que le script vérifie
+Depuis PowerShell Windows :
+
+    scp utilisateur@192.168.x.x:/home/utilisateur/linux-security-auditor/rapport_audit.html C:\Users\toi\Desktop\
+
+Ou depuis VS Code connecté en Remote SSH :
+- Clic droit sur rapport_audit.html
+- Cliquer sur Download
+- Ouvrir dans le navigateur
+
+## Ce que le script vérifie
+
 - Utilisateurs et accès (UID 0, mots de passe vides, sudo, SSH root)
 - Réseau et ports (ports dangereux, pare-feu UFW)
 - Fichiers sensibles (permissions /etc/passwd, /etc/shadow...)
-- Mises à jour de sécurité manquantes
+- Mises à jour de sécurité (apt sur Ubuntu, yum sur CentOS)
 - Tentatives de brute force SSH
 
-#   Structure du projet
-    projet_audit/
+## Structure du projet
+
+    linux-security-auditor/
     ├── audit.py          → script principal
     ├── template.html     → template du rapport
     ├── style.css         → style du rapport
     ├── requirements.txt  → dépendances Python
-    └── README.md         → Explication du script
+    └── README.md         → ce fichier
