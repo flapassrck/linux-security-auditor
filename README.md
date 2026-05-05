@@ -51,9 +51,9 @@ Le rapport rapport_audit.html est généré dans le dossier projet_audit.
     scp utilisateur@192.168.x.x:/home/username/projet_audit/rapport_audit.html C:\Users\username\Desktop\
 ```
 # Option 2 — VS Code Remote SSH
-Clic droit sur rapport_audit.html dans l'explorateur VS Code
-Cliquer sur Download
-Ouvrir le fichier dans le navigateur
+1. Clic droit sur rapport_audit.html dans l'explorateur VS Code
+2. Cliquer sur Download
+3. Ouvrir le fichier dans le navigateur
 
 #   Ce que le script vérifie
 - Utilisateurs et accès (UID 0, mots de passe vides, sudo, SSH root)
