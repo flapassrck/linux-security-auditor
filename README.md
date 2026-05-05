@@ -11,7 +11,7 @@ Génère un rapport HTML avec un score de sécurité global.
 
 ## Installation
 
-### 0. Installer git
+### 1. Installer git
 
 Sur Ubuntu :
 
@@ -21,12 +21,13 @@ Sur CentOS :
 
     sudo yum install git -y
 
-### 1. Cloner le projet
+### 2. Cloner le projet
 
-    git clone https://github.com/ton_pseudo/linux-security-auditor.git
+    git clone https://github.com/flapassrck/linux-security-auditor.git
+#### puis :   
     cd linux-security-auditor
 
-### 2. Installer pip3
+### 3. Installer pip3
 
 Sur Ubuntu :
 
@@ -62,7 +63,7 @@ Le rapport rapport_audit.html est généré dans le dossier du projet.
 
 Depuis PowerShell Windows :
 
-    scp utilisateur@192.168.x.x:/home/utilisateur/linux-security-auditor/rapport_audit.html C:\Users\toi\Desktop\
+    scp username@192.168.x.x:/home/username/linux-security-auditor/rapport_audit.html C:\Users\username\Desktop\
 
 Ou depuis VS Code connecté en Remote SSH :
 - Clic droit sur rapport_audit.html
