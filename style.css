@@ -1,0 +1,51 @@
+body {
+    background: #080c10;
+    color: #c8d8e8;
+    font-family: sans-serif;
+    padding: 40px 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+h1 {
+    color: #e8f4ff;
+    margin-bottom: 5px;
+}
+
+.meta {
+    color: #4a7a9b;
+    font-size: 0.85em;
+    margin-bottom: 30px;
+}
+
+.score {
+    font-size: 4em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.score-label {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #0d1821;
+}
+
+th {
+    padding: 12px;
+    text-align: left;
+    color: #4a7a9b;
+    border-bottom: 1px solid #1a3a5c;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #0f2030;
+}

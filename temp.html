@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Audit Sécurité — {{ hostname }}</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <h1 style="text-align:center;">Linux Security Auditor</h1>
+        <div class="meta" style="text-align:center;">Hôte : {{ hostname }} | Date : {{ now }} | Checks:{{checks|length}}
+        </div>
+
+        <div class="score" style="color:{{ score_color }}; text-align:center;">{{ score }}/100</div>
+        <div class="score-label" style="color:{{ score_color }}; text-align:center;">{{ score_label }}</div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>État</th>
+                    <th>Vérification</th>
+                    <th>Détail</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in checks %}
+                <tr
+                    style="background:{{ status_background[c.status] }}; border-left: 3px solid {{ status_colors[c.status] }};">
+                    <td style="color:{{ status_colors[c.status] }}; text-align:center;">{{ status_icons[c.status] }}
+                    </td>
+                    <td>{{ c.label }}</td>
+                    <td style="color:#aaa;">{{ c.detail }}</td>
+                    <td style="color:{{ status_colors[c.status] }}; text-align:center;">{{ c.points }}/{{ c.max_points}}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</body>
+
+</html>
