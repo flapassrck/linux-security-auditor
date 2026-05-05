@@ -298,7 +298,7 @@ def generate_html_report(all_checks, score, hostname):
         score_label = "Critique"
 
     env = Environment(loader=FileSystemLoader("."))
-    template = env.get_template("temp.html")
+    template = env.get_template("template.html")
 
     html = template.render(
         hostname=hostname,
