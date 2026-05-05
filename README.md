@@ -23,7 +23,7 @@ Génère un rapport HTML avec un score de sécurité global.
 ```
 puis
 ```bash
-    cd projet_audit
+    cd linux-security-auditor
 ```
 #   Installer pip3
 ### Sur Ubuntu :
@@ -50,7 +50,7 @@ Le rapport rapport_audit.html est généré dans le dossier projet_audit.
 #   Exporter le rapport sur Windows
 ## Option 1 — SCP
 ```bash
-    scp utilisateur@192.168.x.x:/home/username/projet_audit/rapport_audit.html C:\Users\username\Desktop\
+    scp utilisateur@192.168.x.x:/home/username/linux-security-auditor/rapport_audit.html C:\Users\username\Desktop\
 ```
 ## Option 2 — VS Code Remote SSH
 1. Clic droit sur rapport_audit.html dans l'explorateur VS Code
