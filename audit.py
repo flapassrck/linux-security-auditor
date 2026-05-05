@@ -175,10 +175,15 @@ def audit_files():
 
     fichiers_sensibles = {
         "/etc/passwd":          ("644", "root"),
-        "/etc/shadow":          ("000", "root"),
         "/etc/sudoers":         ("440", "root"),
         "/etc/ssh/sshd_config": ("600", "root"),
     }
+
+    if Path("/etc/redhat-release").exists():
+        fichiers_sensibles["/etc/shadow"] = ("000", "root")
+    else:
+        fichiers_sensibles["/etc/shadow"] = ("640", "root")
+
     for cheminfichier, (perms_attendue, owner_attendue) in fichiers_sensibles.items():
         p = Path(cheminfichier)
         if not p.exists():
@@ -209,26 +214,45 @@ def audit_files():
 
 #   Module 4 : Mise à jour de sécurité
 def audit_updates():
-    titre("MODULE 4 - Mise à jour de sécurité")
+    titre("MODULE 4 — Mises à jour de sécurité")
     resultats = []
 
-#   Vérification : Mise à jour de sécurité
-    try:
-        subprocess.check_output(["yum", "check-update"], text=True, stderr=subprocess.DEVNULL)
-        ok("Système à jour ! ")
-        resultats.append(Check("Mises à jour", "Ok", "Aucune mise à jour en attente", 10, 10))
-    except subprocess.CalledProcessError as e:
-        if e.returncode == 100:
-            sortie = e.output
-            updates = [l for l in sortie.splitlines() if l and not l.startswith(" ")]
-            probleme(f"{len(updates)} mise(s) à jour disponible(s)")
-            resultats.append(Check("Mises à jour", "Problème", f"{len(updates)} mises à jour en attente", 0, 10))
-        else:
+    if Path("/etc/debian_version").exists():
+        # Ubuntu / Debian
+        try:
+            subprocess.check_output(["apt-get", "update", "-qq"], stderr=subprocess.DEVNULL)
+            sortie = subprocess.check_output(
+                ["apt-get", "-s", "upgrade"], text=True, stderr=subprocess.DEVNULL
+            )
+            updates = [l for l in sortie.splitlines() if l.startswith("Inst")]
+            nb = len(updates)
+            if nb == 0:
+                ok("Système à jour !")
+                resultats.append(Check("Mises à jour", "ok", "Aucune mise à jour", 10, 10))
+            else:
+                probleme(f"{nb} mise(s) à jour disponible(s) !")
+                resultats.append(Check("Mises à jour", "fail", f"{nb} updates en attente", 0, 10))
+        except Exception:
             attention("Impossible de vérifier les mises à jour")
-            resultats.append(Check("Mises à jour", "Attention", "Vérification impossible", 5, 10))
-    except FileNotFoundError:
-        attention("yum introuvable sur le système")
-        resultats.append(Check("Mises à jour", "Attention", "yum introuvable", 5, 10))
+            resultats.append(Check("Mises à jour", "warn", "Vérification impossible", 5, 10))
+
+    elif Path("/etc/redhat-release").exists():
+        # CentOS / RedHat
+        try:
+            subprocess.check_output(["yum", "check-update"], text=True, stderr=subprocess.DEVNULL)
+            ok("Système à jour !")
+            resultats.append(Check("Mises à jour", "ok", "Aucune mise à jour", 10, 10))
+        except subprocess.CalledProcessError as e:
+            if e.returncode == 100:
+                probleme("Des mises à jour sont disponibles !")
+                resultats.append(Check("Mises à jour", "fail", "Updates en attente", 0, 10))
+            else:
+                attention("Impossible de vérifier les mises à jour")
+                resultats.append(Check("Mises à jour", "warn", "Vérification impossible", 5, 10))
+
+    else:
+        attention("OS non reconnu")
+        resultats.append(Check("Mises à jour", "warn", "OS non supporté", 5, 10))
 
     return resultats
 
@@ -298,9 +322,11 @@ def generate_html_report(all_checks, score, hostname):
         score_label = "Critique"
 
     env = Environment(loader=FileSystemLoader("."))
+    css = Path("style.css").read_text()
     template = env.get_template("template.html")
 
     html = template.render(
+        css=css,
         hostname=hostname,
         now=now,
         score=score,
