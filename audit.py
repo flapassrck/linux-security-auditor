@@ -333,9 +333,9 @@ def generate_html_report(all_checks, score, hostname):
         score_color=score_color,
         score_label=score_label,
         checks=all_checks,
-        status_icons={"Ok": "✅", "Attention": "⚠️", "Problème": "❌"},
-        status_colors={"ok": "#00ff88", "warn": "#ffaa00", "fail": "#ff3355"},
-        status_background={"ok": "#0a2e1a", "warn": "#2e2000", "fail": "#2e0a14"},
+        status_icons={"ok": "✅", "attention": "⚠️", "probleme": "❌"},
+        status_colors={"ok": "#00ff88", "attention": "#ffaa00", "probleme": "#ff3355"},
+        status_background={"ok": "#0a2e1a", "attention": "#2e2000", "probleme": "#2e0a14"},
     )
 
     report_path = Path("rapport_audit.html")
