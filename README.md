@@ -9,11 +9,11 @@ Génère un rapport HTML avec un score de sécurité global.
 
 #   Installation
 ## Installer git
-Sur Ubuntu :
+### Sur Ubuntu :
 ```bash
     sudo apt install git -y
 ```
-Sur CentOS :
+### Sur CentOS :
 ```bash
     sudo yum install git -y
 ```
@@ -24,11 +24,11 @@ Sur CentOS :
 ```
 
 #   Installer pip3
-Sur Ubuntu :
+### Sur Ubuntu :
 ```bash
     sudo apt install python3-pip -y
 ```
-Sur CentOS :
+### Sur CentOS :
 ```bash
     sudo yum install python3-pip -y
 ```
