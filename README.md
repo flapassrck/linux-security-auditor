@@ -8,7 +8,7 @@ Génère un rapport HTML avec un score de sécurité global.
 - Droits sudo
 
 #   Installation
-# Installer git
+## Installer git
 Sur Ubuntu :
 ```bash
     sudo apt install git -y
@@ -17,7 +17,7 @@ Sur CentOS :
 ```bash
     sudo yum install git -y
 ```
-# Cloner le projet
+## Cloner le projet
 ```bash
     git clone https://github.com/flapassrck/projet_audit.git
     cd projet_audit
@@ -46,11 +46,11 @@ Sur CentOS :
 Le rapport rapport_audit.html est généré dans le dossier projet_audit.
 
 #   Exporter le rapport sur Windows
-# Option 1 — SCP
+## Option 1 — SCP
 ```bash
     scp utilisateur@192.168.x.x:/home/username/projet_audit/rapport_audit.html C:\Users\username\Desktop\
 ```
-# Option 2 — VS Code Remote SSH
+## Option 2 — VS Code Remote SSH
 1. Clic droit sur rapport_audit.html dans l'explorateur VS Code
 2. Cliquer sur Download
 3. Ouvrir le fichier dans le navigateur

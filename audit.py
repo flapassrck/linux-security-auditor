@@ -334,7 +334,7 @@ def main():
         probleme(f"Score final : {score}/100 — Niveau critique !")
     
     rapport = generate_html_report(all_checks, score, socket.gethostname())
-    info(f"Rapport générée : {rapport.resolve()}")
+    info(f"Rapport généré : {rapport.resolve()}")
 
 main()
 
