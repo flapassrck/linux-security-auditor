@@ -20,9 +20,11 @@ Génère un rapport HTML avec un score de sécurité global.
 ## Cloner le projet
 ```bash
     git clone https://github.com/flapassrck/linux-security-auditor
+```
+puis
+```bash
     cd projet_audit
 ```
-
 #   Installer pip3
 ### Sur Ubuntu :
 ```bash
