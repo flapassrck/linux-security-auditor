@@ -34,7 +34,7 @@ def attention(msg):
 def probleme(msg):
     print(f"{ROUGE}❌ {RESET} {msg}")
 def info(msg):
-    print(f"{CYAN}ℹ️ {RESET}  {msg}")
+    print(f"{CYAN}ℹ️ {RESET} {msg}")
 def titre(msg):
     print(f"{GRAS}{CYAN}{'='*50}\n{msg.center(50)}\n{'='*50}{RESET}")
 
