@@ -299,13 +299,15 @@ def audit_ssh_logs():
 
     return resultats
 
+#   Calcul le score global de tous les checks
 def compte_score(all_checks):
     total_points = sum(c.points for c in all_checks)
     total_max    = sum(c.max_points for c in all_checks)
     score = int((total_points / total_max) * 100) if total_max > 0 else 0
+    
     return score, total_points, total_max
 
-
+#    Générer le rapport HTML
 def generate_html_report(all_checks, score, hostname):
     from jinja2 import Environment, FileSystemLoader
 
@@ -340,8 +342,10 @@ def generate_html_report(all_checks, score, hostname):
 
     chemin_rapport = Path("rapport_audit.html")
     chemin_rapport.write_text(html, encoding="utf-8")
-    return chemin_rapport
     
+    return chemin_rapport
+
+#    Fonction principale
 def main():
     all_checks = []
     all_checks += audit_users()
