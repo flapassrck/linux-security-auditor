@@ -250,7 +250,7 @@ def audit_updates():
                 resultats.append(Check("Mises à jour", "attention", "Vérification impossible", 5, 10))
     else:
         attention("OS non reconnu")
-resultats.append(Check("Mises à jour", "attention", "OS non supporté", 5, 10))
+        resultats.append(Check("Mises à jour", "attention", "OS non supporté", 5, 10))
 
     return resultats
 
