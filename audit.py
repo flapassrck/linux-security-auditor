@@ -53,26 +53,26 @@ def audit_users():
     resultats = []
 
 #   Vérification 1 : Comptes avec UID 0
-    uid0_users = [i.pw_name for i in pwd.getpwall() if i.pw_uid == 0]
+    utilisateurs_uid0 = [i.pw_name for i in pwd.getpwall() if i.pw_uid == 0]
     if uid0_users == ["root"]:
         ok("Un seul compte UID 0 (root)")
         resultats.append(Check("Comptes UID 0", "ok", "Seulement root", 10, 10))
     else:
-        extra = [j for j in uid0_users if j != "root"]
-        attention(f"Comptes UID 0 suspects : {', '.join(extra)}")
-        resultats.append(Check("Comptes UID 0", "attention", f"Suspects : {', '.join(extra)}", 0, 10))
+        users_suspects = [j for j in utilisateurs_uid0 if j != "root"]
+        attention(f"Comptes UID 0 suspects : {', '.join(users_suspects)}")
+        resultats.append(Check("Comptes UID 0", "attention", f"Suspects : {', '.join(users_suspects)}", 0, 10))
 
 #   Vérification 2 : Comptes sans mot de passe
     try:
         shadow = Path("/etc/shadow").read_text()
-        empty_mdp = []
-        for line in shadow.splitlines():
-            parts = line.split(":")
+        mdp_vide = []
+        for ligne in shadow.splitlines():
+            parts = ligne.split(":")
             if len(parts) >= 2 and parts[1] == "":
-                empty_mdp.append(parts[0])
-        if empty_mdp:
-            attention(f"Comptes sans mot de passe : {', '.join(empty_mdp)}")
-            resultats.append(Check("Comptes sans mot de passe", "attention", f"{', '.join(empty_mdp)}", 0, 10))
+                mdp_vide.append(parts[0])
+        if mdp_vide:
+            attention(f"Comptes sans mot de passe : {', '.join(mdp_vide)}")
+            resultats.append(Check("Comptes sans mot de passe", "attention", f"{', '.join(mdp_vide)}", 0, 10))
         else:
             ok("Aucun compte sans mot de passe")
             resultats.append(Check("Comptes sans mot de passe", "ok", "Aucun compte sans mot de passe", 10, 10))
@@ -231,7 +231,7 @@ def audit_updates():
                 resultats.append(Check("Mises à jour", "ok", "Aucune mise à jour", 10, 10))
             else:
                 probleme(f"{nb} mise(s) à jour disponible(s) !")
-                resultats.append(Check("Mises à jour", "probleme", f"{nb} updates en attente", 0, 10))
+                resultats.append(Check("Mises à jour", "probleme", f"{nb} mise à jour en attente", 0, 10))
         except Exception:
             attention("Impossible de vérifier les mises à jour")
             resultats.append(Check("Mises à jour", "attention", "Vérification impossible", 5, 10))
