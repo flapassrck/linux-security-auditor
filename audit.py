@@ -54,7 +54,7 @@ def audit_users():
 
 #   Vérification 1 : Comptes avec UID 0
     utilisateurs_uid0 = [i.pw_name for i in pwd.getpwall() if i.pw_uid == 0]
-    if uid0_users == ["root"]:
+    if utilisateurs_uid0 == ["root"]:
         ok("Un seul compte UID 0 (root)")
         resultats.append(Check("Comptes UID 0", "ok", "Seulement root", 10, 10))
     else:
