@@ -215,8 +215,9 @@ def audit_files():
 #   Module 4 : Mise à jour de sécurité
 def audit_updates():
     titre("MODULE 4 — Mises à jour de sécurité")
-    results = []
+    resultats = []
 
+    # Détection de l'OS
     if Path("/etc/debian_version").exists():
         # Ubuntu / Debian
         try:
@@ -228,8 +229,8 @@ def audit_updates():
                 ok("Système à jour !")
                 resultats.append(Check("Mises à jour", "ok", "Aucune mise à jour", 10, 10))
             else:
-                probleme(f"{nb} mise(s) à jour disponible(s) !")
-                resultats.append(Check("Mises à jour", "probleme", f"{nb} mise(s) à jour(s) en attente", 0, 10))
+                probleme("Des mises à jour sont disponibles !")
+                resultats.append(Check("Mises à jour", "probleme", "Mise(s) à jour(s) en attente", 0, 10))
         except Exception:
             attention("Impossible de vérifier les mises à jour")
             resultats.append(Check("Mises à jour", "attention", "Vérification impossible", 5, 10))
@@ -242,17 +243,15 @@ def audit_updates():
             resultats.append(Check("Mises à jour", "ok", "Aucune mise à jour", 10, 10))
         except subprocess.CalledProcessError as e:
             if e.returncode == 100:
-                updates = [l for l in e.sortie.splitlines() if l and not l.startswith(" ") and not l.startswith("Loaded")]
-                nb = len(updates)
-                probleme(f"{nb} mise(s) à jour disponible(s) !")
-                resultats.append(Check("Mises à jour", "probleme", f"{nb} mise(s) à jour(s) en attente", 0, 10))
+                probleme("Des mises à jour sont disponibles !")
+                resultats.append(Check("Mises à jour", "probleme", "Mise(s) à jour(s) en attente", 0, 10))
             else:
                 attention("Impossible de vérifier les mises à jour")
                 resultats.append(Check("Mises à jour", "attention", "Vérification impossible", 5, 10))
 
     else:
-        warn("OS non reconnu")
-        results.append(Check("Mises à jour", "warn", "OS non supporté", 5, 10))
+        attention("OS non reconnu")
+        resultats.append(Check("Mises à jour", "attention", "OS non supporté", 5, 10))
 
     return results
 
