@@ -338,9 +338,9 @@ def generate_html_report(all_checks, score, hostname):
         status_background={"ok": "#0a2e1a", "attention": "#2e2000", "probleme": "#2e0a14"},
     )
 
-    report_path = Path("rapport_audit.html")
-    report_path.write_text(html, encoding="utf-8")
-    return report_path
+    chemin_rapport = Path("rapport_audit.html")
+    chemin_rapport.write_text(html, encoding="utf-8")
+    return chemin_rapport
     
 def main():
     all_checks = []
