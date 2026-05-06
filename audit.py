@@ -253,7 +253,7 @@ def audit_updates():
         attention("OS non reconnu")
         resultats.append(Check("Mises à jour", "attention", "OS non supporté", 5, 10))
 
-    return results
+    return resultats
 
 #   Module 5 : Tentative de connexion SSH par Force Brute
 def audit_ssh_logs():
