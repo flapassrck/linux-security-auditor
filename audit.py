@@ -30,7 +30,7 @@ RESET = '\033[0m'
 def ok(msg):
     print(f"{VERT}✅ {RESET} {msg}")
 def attention(msg):
-    print(f"{JAUNE}⚠️ {RESET}  {msg}")
+    print(f"{JAUNE}⚠️ {RESET} {msg}")
 def probleme(msg):
     print(f"{ROUGE}❌ {RESET} {msg}")
 def info(msg):
