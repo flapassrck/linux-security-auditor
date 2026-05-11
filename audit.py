@@ -240,7 +240,7 @@ def audit_updates():
             resultats.append(Verif("Mises à jour", "ok", "Aucune mise à jour", 10, 10))
         except subprocess.CalledProcessError as e:
             if e.returncode == 100:
-                sortie = e.sortie if e.sortie else ""
+                sortie = e.output if e.output else ""
                 updates = [l for l in sortie.splitlines() if l and not l.startswith(" ") and not l.startswith("Loaded")]
                 nb = len(updates)
                 probleme(f"{nb} mise(s) à jour(s) disponible(s) !")
