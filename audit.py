@@ -39,7 +39,7 @@ def titre(msg):
     print(f"{GRAS}{CYAN}{'='*50}\n{msg.center(50)}\n{'='*50}{RESET}")
 
 #   Résultat d'une vérification (status, détails, points obtenus, points max)
-class Check:
+class Verif:
     def __init__(self, label, status, detail="", points=0, max_points=10):
         self.label      = label
         self.status     = status
@@ -56,11 +56,11 @@ def audit_users():
     utilisateurs_uid0 = [i.pw_name for i in pwd.getpwall() if i.pw_uid == 0]
     if utilisateurs_uid0 == ["root"]:
         ok("Un seul compte UID 0 (root)")
-        resultats.append(Check("Comptes UID 0", "ok", "Seulement root", 10, 10))
+        resultats.append(Verif("Comptes UID 0", "ok", "Seulement root", 10, 10))
     else:
         users_suspects = [j for j in utilisateurs_uid0 if j != "root"]
         attention(f"Comptes UID 0 suspects : {', '.join(users_suspects)}")
-        resultats.append(Check("Comptes UID 0", "attention", f"Suspects : {', '.join(users_suspects)}", 0, 10))
+        resultats.append(Verif("Comptes UID 0", "attention", f"Suspects : {', '.join(users_suspects)}", 0, 10))
 
 #   Vérification 2 : Comptes sans mot de passe
     try:
@@ -72,13 +72,13 @@ def audit_users():
                 mdp_vide.append(parts[0])
         if mdp_vide:
             attention(f"Comptes sans mot de passe : {', '.join(mdp_vide)}")
-            resultats.append(Check("Comptes sans mot de passe", "attention", f"{', '.join(mdp_vide)}", 0, 10))
+            resultats.append(Verif("Comptes sans mot de passe", "attention", f"{', '.join(mdp_vide)}", 0, 10))
         else:
             ok("Aucun compte sans mot de passe")
-            resultats.append(Check("Comptes sans mot de passe", "ok", "Aucun compte sans mot de passe", 10, 10))
+            resultats.append(Verif("Comptes sans mot de passe", "ok", "Aucun compte sans mot de passe", 10, 10))
     except PermissionError:
         probleme("Impossible d'acceder au fichier /etc/shadow")
-        resultats.append(Check("Comptes sans mot de passe", "probleme", "Nécessite de se connecter en sudo", 0, 10))
+        resultats.append(Verif("Comptes sans mot de passe", "probleme", "Nécessite de se connecter en sudo", 0, 10))
 
 #   Vérification 3 : Membres du groupe sudo
     groupe_trouve = None
@@ -93,13 +93,13 @@ def audit_users():
     
     if groupe_trouve is None:
         info(f"Groupe sudo ou wheel non trouvé")
-        resultats.append(Check(f"Groupe sudo", "ok", "Groupe inexistant", 10, 10))
+        resultats.append(Verif(f"Groupe sudo", "ok", "Groupe inexistant", 10, 10))
     elif sudo_membres:
         attention(f"Membres du groupe {groupe_trouve} : {', '.join(sudo_membres)}")
-        resultats.append(Check(f"Groupe sudo", "attention", f"Membres : {', '.join(sudo_membres)}", 5, 10))
+        resultats.append(Verif(f"Groupe sudo", "attention", f"Membres : {', '.join(sudo_membres)}", 5, 10))
     else:
         ok(f"Groupe {groupe_trouve} vide")
-        resultats.append(Check(f"Groupe sudo", "ok", f"Aucun membre", 10, 10))
+        resultats.append(Verif(f"Groupe sudo", "ok", f"Aucun membre", 10, 10))
 
 #   Vérification 4 : Connexions SSH root
     sshd_config = Path("/etc/ssh/sshd_config")
@@ -107,16 +107,16 @@ def audit_users():
         contenue = sshd_config.read_text()
         if "PermitRootLogin yes" in contenue:
             probleme("SSH - connexion root autorisée")
-            resultats.append(Check("SSH - PermitRootLogin", "probleme", "Root login activé", 0, 10))
+            resultats.append(Verif("SSH - PermitRootLogin", "probleme", "Root login activé", 0, 10))
         elif "PermitRootLogin no" in contenue:
             ok("SSH - connexion root desactivé")
-            resultats.append(Check("SSH - PermitRootLogin", "ok", "Root login desactivé", 10, 10))
+            resultats.append(Verif("SSH - PermitRootLogin", "ok", "Root login desactivé", 10, 10))
         else:
             attention("SSH - PermitRootLogin non défini")
-            resultats.append(Check("SSH - PermitRootLogin", "attention", "Root login non défini", 7, 10))
+            resultats.append(Verif("SSH - PermitRootLogin", "attention", "Root login non défini", 7, 10))
     else:
         attention("Fichier sshd_config introuvable")
-        resultats.append(Check("SSH - PermitRootLogin", "attention", "Fichier introuvable", 5, 10))
+        resultats.append(Verif("SSH - PermitRootLogin", "attention", "Fichier introuvable", 5, 10))
     
     return resultats
 
@@ -143,26 +143,26 @@ def audit_network():
         if dangereux_trouvees:
             for port, service in dangereux_trouvees.items():
                 probleme(f"Port dangereux ouvert : {port} ({service})")
-            resultats.append(Check(f"Port dangereux", "Problème", f"Ouverts : {', '.join(str(p) for p in ports_ouverts)}", 0, 10))
+            resultats.append(Verif(f"Port dangereux", "Problème", f"Ouverts : {', '.join(str(p) for p in ports_ouverts)}", 0, 10))
         else:
             ok(f"Aucun port dangereux ({len(ports_ouverts)} ports ouverts)")
-            resultats.append(Check(f"Port dangereux", "ok", f"({len(ports_ouverts)} ports ouverts)", 10, 10))
+            resultats.append(Verif(f"Port dangereux", "ok", f"({len(ports_ouverts)} ports ouverts)", 10, 10))
     except (subprocess.CalledProcessError, FileNotFoundError):
         attention("Impossible d'exécuter 'ss'")
-        resultats.append(Check(f"Port dangereux", "attention", "Impossible d'exécuter 'ss'", 5, 10))
+        resultats.append(Verif(f"Port dangereux", "attention", "Impossible d'exécuter 'ss'", 5, 10))
 
 #   Vérification 2 : Statut du pare-feu UFW
     try:
         status_ufw = subprocess.check_output(["ufw", "status"], text=True, stderr=subprocess.DEVNULL)
         if "active" in status_ufw.lower():
             ok("Pare-feu UFW actif")
-            resultats.append(Check("Pare-feu UFW", "ok", "UFW actif", 10, 10))
+            resultats.append(Verif("Pare-feu UFW", "ok", "UFW actif", 10, 10))
         else:
             probleme("Pare-feu UFW inactif")
-            resultats.append(Check("Pare-feu UFW", "probleme", "UFW inactif", 0, 10))
+            resultats.append(Verif("Pare-feu UFW", "probleme", "UFW inactif", 0, 10))
     except (subprocess.CalledProcessError, FileNotFoundError):
         attention("UFW non disponible")
-        resultats.append(Check("Pare-feu UFW", "attention", "UFW absent", 5, 10))
+        resultats.append(Verif("Pare-feu UFW", "attention", "UFW absent", 5, 10))
     
     return resultats
 
@@ -205,10 +205,10 @@ def audit_files():
 
         if issues:
             probleme(f"Fichier {cheminfichier} : {', '.join(issues)}")
-            resultats.append(Check(f"Permissions {cheminfichier}", "probleme", ', '.join(issues), 0, 10))
+            resultats.append(Verif(f"Permissions {cheminfichier}", "probleme", ', '.join(issues), 0, 10))
         else:
             ok(f"{cheminfichier} : correct")
-            resultats.append(Check(f"Permissions {cheminfichier}", "ok", "OK", 10, 10))
+            resultats.append(Verif(f"Permissions {cheminfichier}", "ok", "OK", 10, 10))
 
     return resultats
 
@@ -225,32 +225,32 @@ def audit_updates():
             nb = len(updates)
             if nb == 0:
                 ok("Système à jour !")
-                resultats.append(Check("Mises à jour", "ok", "Aucune mise à jour", 10, 10))
+                resultats.append(Verif("Mises à jour", "ok", "Aucune mise à jour", 10, 10))
             else:
                 probleme(f"{nb} mise(s) à jour disponible(s) !")
-                resultats.append(Check("Mises à jour", "probleme", f"{nb} mise(s) à jour(s) en attente", 0, 10))
+                resultats.append(Verif("Mises à jour", "probleme", f"{nb} mise(s) à jour(s) en attente", 0, 10))
         except Exception:
             attention("Impossible de vérifier les mises à jour")
-            resultats.append(Check("Mises à jour", "attention", "Vérification impossible", 5, 10))
+            resultats.append(Verif("Mises à jour", "attention", "Vérification impossible", 5, 10))
 
     elif Path("/etc/redhat-release").exists():
         try:
             subprocess.check_output(["yum", "check-update"], text=True, stderr=subprocess.DEVNULL)
             ok("Système à jour !")
-            resultats.append(Check("Mises à jour", "ok", "Aucune mise à jour", 10, 10))
+            resultats.append(Verif("Mises à jour", "ok", "Aucune mise à jour", 10, 10))
         except subprocess.CalledProcessError as e:
             if e.returncode == 100:
                 sortie = e.sortie if e.sortie else ""
                 updates = [l for l in sortie.splitlines() if l and not l.startswith(" ") and not l.startswith("Loaded")]
                 nb = len(updates)
                 probleme(f"{nb} mise(s) à jour(s) disponible(s) !")
-                resultats.append(Check("Mises à jour", "probleme", f"{nb} mise(s) à jour(s) en attente", 0, 10))
+                resultats.append(Verif("Mises à jour", "probleme", f"{nb} mise(s) à jour(s) en attente", 0, 10))
             else:
                 attention("Impossible de vérifier les mises à jour")
-                resultats.append(Check("Mises à jour", "attention", "Vérification impossible", 5, 10))
+                resultats.append(Verif("Mises à jour", "attention", "Vérification impossible", 5, 10))
     else:
         attention("OS non reconnu")
-        resultats.append(Check("Mises à jour", "attention", "OS non supporté", 5, 10))
+        resultats.append(Verif("Mises à jour", "attention", "OS non supporté", 5, 10))
 
     return resultats
 
@@ -270,7 +270,7 @@ def audit_ssh_logs():
 
     if log_trouve == None:
         attention("Aucun fichier de logs SSH trouvé")
-        resultats.append(Check("Logs SSH", "attention", "Aucun fichier de logs SSH rencontré", 5, 10))
+        resultats.append(Verif("Logs SSH", "attention", "Aucun fichier de logs SSH rencontré", 5, 10))
 
     try:
         contenu = Path(log_trouve).read_text(errors="ignore")
@@ -279,13 +279,13 @@ def audit_ssh_logs():
 
         if nb == 0:
             ok("Aucune tentative de connexion échouées")
-            resultats.append(Check("Brute force SSH", "ok", "Aucune tentative", 10, 10))
+            resultats.append(Verif("Brute force SSH", "ok", "Aucune tentative", 10, 10))
         elif nb < 20:
             attention(f"{nb} tentatives échouées detectées")
-            resultats.append(Check("Brute force SSH", "attention", f"{nb} tentatives", 5, 10))
+            resultats.append(Verif("Brute force SSH", "attention", f"{nb} tentatives", 5, 10))
         else:
             probleme(f"{nb} tentatives échouées - possible brute force")
-            resultats.append(Check("Brute force SSH", "probleme", f"{nb} tentatives", 0, 10))
+            resultats.append(Verif("Brute force SSH", "probleme", f"{nb} tentatives", 0, 10))
 
         if tentatives:
             info("3 dernières tentatives :")
@@ -293,7 +293,7 @@ def audit_ssh_logs():
                 info(ligne.strip())
     except PermissionError:
         attention("Logs innaccessibles - relance en sudo")
-        resultats.append(Check("Brute force SSH", "attention", "Nécessite de relancer en sudo", 5, 10))
+        resultats.append(Verif("Brute force SSH", "attention", "Nécessite de relancer en sudo", 5, 10))
 
     return resultats
 
