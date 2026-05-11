@@ -134,8 +134,8 @@ def audit_network():
         for lignes in sortie.splitlines()[1:]:
             parts = lignes.split()
             if len(parts) >= 4:
-                address = parts[3]
-                port = int(address.rsplit(":", 1)[-1])
+                addresse = parts[3]
+                port = int(addresse.rsplit(":", 1)[-1])
                 ports_ouverts.append(port)
         
         dangereux_trouvees = {p: ports_dangereux[p] for p in ports_ouverts if p in ports_dangereux}
