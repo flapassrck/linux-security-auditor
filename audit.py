@@ -110,7 +110,7 @@ def audit_users():
             resultats.append(Verif("SSH - PermitRootLogin", "probleme", "Root login activé", 0, 10))
         elif "PermitRootLogin no" in contenue:
             ok("SSH - connexion root desactivé")
-            resultats.append(Verif("SSH - PermitRootLogin", "ok", "Root login desactivé", 10, 10))
+            resultats.append(Verif("SSH - PermitRootLogin", "ok", "Root login desactivée", 10, 10))
         else:
             attention("SSH - PermitRootLogin non défini")
             resultats.append(Verif("SSH - PermitRootLogin", "attention", "Root login non défini", 7, 10))
