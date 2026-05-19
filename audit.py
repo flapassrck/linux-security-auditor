@@ -358,6 +358,8 @@ def generate_html_report(all_checks, score, hostname):
 
 #    Fonction principale
 def main():
+    debut = datetime.datetime.now()
+    
     all_checks = []
     all_checks += audit_users()
     all_checks += audit_network()
@@ -376,6 +378,10 @@ def main():
     
     rapport = generate_html_report(all_checks, score, socket.gethostname())
     info(f"Rapport généré : {rapport.resolve()}")
+
+    fin = datetime.datetime.now()
+    duree = (fin - debut).total_seconds()
+    info(f"Durée d'exécution : {duree:.2f} secondes")
 
 main()
 
