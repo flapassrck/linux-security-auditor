@@ -81,6 +81,14 @@ def audit_users():
         resultats.append(Verif("Comptes sans mot de passe", "probleme", "Nécessite de se connecter en sudo", 0, 10))
 
 #   Vérification 3 : Membres du groupe sudo
+    try:
+        with open("whitelist.json", "r") as f:
+            whitelist = json.load(f)
+        admins_autorises = whitelist.get("admins_autorises", [])
+    except FileNotFoundError:
+        admins_autorises = []
+        attention("whitelist.json introuvable — tous les membres sudo seront signalés")
+    
     groupe_trouve = None
     for nom_groupe in ["sudo", "wheel"]:
         try:
@@ -93,13 +101,18 @@ def audit_users():
     
     if groupe_trouve is None:
         info(f"Groupe sudo ou wheel non trouvé")
-        resultats.append(Verif(f"Groupe sudo", "ok", "Groupe inexistant", 10, 10))
-    elif sudo_membres:
-        attention(f"Membres du groupe {groupe_trouve} : {', '.join(sudo_membres)}")
-        resultats.append(Verif(f"Groupe sudo", "attention", f"Membres : {', '.join(sudo_membres)}", 5, 10))
+        resultats.append(Check(f"Groupe sudo", "ok", "Groupe inexistant", 10, 10))
     else:
-        ok(f"Groupe {groupe_trouve} vide")
-        resultats.append(Verif(f"Groupe sudo", "ok", f"Aucun membre", 10, 10))
+        suspects = [m for m in sudo_membres if m not in admins_autorises]
+        if suspects:
+            probleme(f"Membres sudo non autorisés : {', '.join(suspects)}")
+            resultats.append(Check("Groupe sudo", "probleme", f"Suspects : {', '.join(suspects)}", 0, 10))
+        elif sudo_membres:
+            attention(f"Membres du groupe {groupe_trouve} : {', '.join(sudo_membres)}")
+            resultats.append(Check(f"Groupe sudo", "attention", f"Membres : {', '.join(sudo_membres)}", 5, 10))
+        else:
+            ok(f"Groupe {groupe_trouve} vide")
+            resultats.append(Check(f"Groupe sudo", "ok", f"Aucun membre", 10, 10))
 
 #   Vérification 4 : Connexions SSH root
     sshd_config = Path("/etc/ssh/sshd_config")
