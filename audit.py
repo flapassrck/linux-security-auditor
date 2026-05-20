@@ -116,7 +116,7 @@ def audit_users():
     else:
         suspects = [m for m in sudo_membres if m not in admins_autorises]
         if suspects:
-            probleme(f"Membres sudo non autorisés : {', '.join(suspects)}")
+            probleme(f"Membre(s) sudo non autorisé(s) : {', '.join(suspects)}")
             resultats.append(Check(
                 "Groupe sudo", "probleme",
                 f"Suspects : {', '.join(suspects)}",
