@@ -37,6 +37,14 @@
                     <td style="color:{{ status_colors[c.status] }}; text-align:center;">{{ c.points }}/{{ c.max_points}}
                     </td>
                 </tr>
+                {% if c.recommandation %}
+                <tr style="background:#0d1421;">
+                    <td></td>
+                    <td colspan="3" style="color:#aaa; font-size:0.9em; padding: 6px 16px 12px 16px;">
+                        💡 <strong style="color:#ffaa00;">Recommandation :</strong> {{ c.recommandation }}
+                    </td>
+                </tr>
+                {% endif %}
                 {% endfor %}
             </tbody>
         </table>
