@@ -126,7 +126,7 @@ def audit_users():
         elif sudo_membres:
             attention(f"Membres du groupe {groupe_trouve} : {', '.join(sudo_membres)}")
             resultats.append(Check(
-                f"Groupe sudo", "attention",
+                "Groupe sudo", "attention",
                 f"Membres : {', '.join(sudo_membres)}",
                 5, 10,
                 "Vérifier que tous les membres de ce groupe ont bien besoin des droits administrateur. Mettre à jour la whitelist.json si nécessaire."
