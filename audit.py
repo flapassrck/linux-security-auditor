@@ -60,10 +60,10 @@ def audit_users():
         resultats.append(Check("Comptes UID 0", "ok", "Seulement root", 10, 10))
     else:
         users_suspects = [j for j in utilisateurs_uid0 if j != "root"]
-        attention(f"Comptes UID 0 suspects : {', '.join(users_suspects)}")
+        attention(f"Compte(s) UID 0 suspect(s) : {', '.join(users_suspects)}")
         resultats.append(Check(
             "Comptes UID 0", "attention",
-            f"Suspects : {', '.join(users_suspects)}",
+            f"Suspect(s) : {', '.join(users_suspects)}",
             0, 10,
             "Seul le compte root doit avoir l'UID 0. Modifier l'UID du compte suspect avec : sudo usermod -u 1001 nom_user"
         ))
@@ -77,7 +77,7 @@ def audit_users():
             if len(parts) >= 2 and parts[1] == "":
                 mdp_vide.append(parts[0])
         if mdp_vide:
-            attention(f"Comptes sans mot de passe : {', '.join(mdp_vide)}")
+            attention(f"Compte(s) sans mot de passe : {', '.join(mdp_vide)}")
             resultats.append(Check(
                 "Comptes sans mot de passe", "attention",
                 f"{', '.join(mdp_vide)}",
@@ -119,12 +119,12 @@ def audit_users():
             probleme(f"Membre(s) sudo non autorisé(s) : {', '.join(suspects)}")
             resultats.append(Check(
                 "Groupe sudo", "probleme",
-                f"Suspects : {', '.join(suspects)}",
+                f"Suspect(s) : {', '.join(suspects)}",
                 0, 10,
                 "Cet utilisateur a les droits administrateur sans être dans la whitelist. Le retirer du groupe sudo avec : sudo deluser nom_user sudo (Ubuntu) ou sudo gpasswd -d nom_user wheel (CentOS)"
             ))
         elif sudo_membres:
-            attention(f"Membres du groupe {groupe_trouve} : {', '.join(sudo_membres)}")
+            attention(f"Membre(s) du groupe {groupe_trouve} : {', '.join(sudo_membres)}")
             resultats.append(Check(
                 "Groupe sudo", "attention",
                 f"Membres : {', '.join(sudo_membres)}",
