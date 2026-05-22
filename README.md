@@ -24,7 +24,6 @@ Sur CentOS :
 ### 2. Cloner le projet
 
     git clone https://github.com/flapassrck/linux-security-auditor.git
-#### puis :   
     cd linux-security-auditor
 
 ### 3. Installer pip3
@@ -37,7 +36,7 @@ Sur CentOS :
 
     sudo yum install python3-pip -y
 
-### 3. Installer les dépendances
+### 4. Installer les dépendances
 
 Sur Ubuntu :
 
@@ -58,6 +57,36 @@ Lancer le script :
     sudo python3 audit.py
 
 Le rapport rapport_audit.html est généré dans le dossier du projet.
+
+Comparer les 2 derniers rapports :
+
+    python3 audit.py --comparer
+
+## Whitelist des admins
+
+Modifier le fichier whitelist.json pour définir les administrateurs autorisés :
+
+    {
+        "admins_autorises": ["florian", "root"]
+    }
+
+Tout utilisateur dans le groupe sudo absent de cette liste sera signalé comme suspect.
+
+## Historique des rapports
+
+Chaque audit génère automatiquement deux fichiers dans le dossier historique/ :
+- Un fichier HTML pour la consultation visuelle
+- Un fichier JSON pour la comparaison entre deux audits
+
+Exemple :
+
+    historique/
+    ├── rapport_20260521_183045.html
+    ├── rapport_20260521_183045.json
+    ├── rapport_20260522_091200.html
+    └── rapport_20260522_091200.json
+
+Il faut avoir lancé au moins 2 audits pour pouvoir utiliser la comparaison.
 
 ## Récupérer le rapport sur Windows
 
@@ -84,5 +113,7 @@ Ou depuis VS Code connecté en Remote SSH :
     ├── audit.py          → script principal
     ├── template.html     → template du rapport
     ├── style.css         → style du rapport
+    ├── whitelist.json    → admins autorisés
     ├── requirements.txt  → dépendances Python
-    └── README.md         → ce fichier
+    ├── README.md         → ce fichier
+    └── historique/       → rapports générés automatiquement
