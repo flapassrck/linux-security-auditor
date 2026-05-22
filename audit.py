@@ -412,6 +412,27 @@ def audit_ssh_logs():
         attention("Logs innaccessibles - relance en sudo")
         resultats.append(Check("Brute force SSH", "attention", "Nécessite de relancer en sudo", 5, 10))
 
+    #   Vérification 2 : IPs les plus actives
+    if log_trouve and tentatives:
+        from collections import Counter
+        ips = []
+        for ligne in tentatives:
+            parts = ligne.split()
+            for i, mot in enumerate(parts):
+                if mot == "from" and i + 1 < len(parts):
+                    ips.append(parts[i + 1])
+        if ips:
+            top_ips = Counter(ips).most_common(3)
+            info("Top 3 IPs suspectes :")
+            for ip, nb_tentatives in top_ips:
+                attention(f"{ip} — {nb_tentatives} tentative(s)")
+            resultats.append(Check(
+                "IPs suspectes", "attention",
+                f"Top IP : {top_ips[0][0]} ({top_ips[0][1]} tentatives)",
+                5, 10,
+                f"Bloquer manuellement avec : sudo ufw deny from {top_ips[0][0]} ou installer fail2ban"
+            ))
+
     return resultats
 
 #   Module 6 : SELinux / AppArmor
