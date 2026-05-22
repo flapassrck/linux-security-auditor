@@ -16,6 +16,7 @@ import subprocess
 import socket
 import datetime
 import json
+import argparse
 from pathlib import Path
 
 #   Couleurs pour le terminal Linux
@@ -417,14 +418,103 @@ def generate_html_report(all_checks, score, hostname):
         status_background={"ok": "#0a2e1a", "attention": "#2e2000", "probleme": "#2e0a14"},
     )
 
+    # Sauvegarde le rapport HTML
     chemin_rapport = Path("rapport_audit.html")
     chemin_rapport.write_text(html, encoding="utf-8")
 
+    # Sauvegarde le rapport dans un dossier historique
+    dossier_historique = Path("historique")
+    dossier_historique.mkdir(exist_ok=True)
+    nom_historique = f"rapport_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
+    chemin_historique = dossier_historique / nom_historique
+    chemin_historique.write_text(html, encoding="utf-8")
+    info(f"Rapport sauvegardé dans l'historique : {chemin_historique}")
+
+    # Sauvegarde JSON
+    donnees = [{
+        "label": c.label,
+        "status": c.status,
+        "detail": c.detail,
+        "points": c.points,
+        "max_points": c.max_points
+    } for c in all_checks]
+
+    chemin_json = dossier_historique / nom_historique.replace(".html", ".json")
+    chemin_json.write_text(json.dumps({
+        "hostname": hostname,
+        "date": now,
+        "score": score,
+        "checks": donnees
+    }, ensure_ascii=False, indent=2), encoding="utf-8")
+
     return chemin_rapport
+
+#   Comparer les deux derniers rapports
+def comparer_rapports():
+    historique = Path("historique")
+    rapports = sorted(historique.glob("rapport_*.json"))
+
+    if len(rapports) < 2:
+        probleme("Il faut au moins 2 rapports dans l'historique pour comparer")
+        return
+
+    with open(rapports[-2], encoding="utf-8") as f:
+        ancien = json.load(f)
+    with open(rapports[-1], encoding="utf-8") as f:
+        nouveau = json.load(f)
+
+    titre("COMPARAISON DES 2 DERNIERS RAPPORTS")
+    info(f"Ancien : {rapports[-2].name} — Score : {ancien['score']}/100")
+    info(f"Nouveau : {rapports[-1].name} — Score : {nouveau['score']}/100")
+
+    ancien_checks = {c["label"]: c for c in ancien["checks"]}
+    nouveau_checks = {c["label"]: c for c in nouveau["checks"]}
+
+    ameliorations = []
+    degradations = []
+    inchanges = []
+
+    for label, check in nouveau_checks.items():
+        if label in ancien_checks:
+            ancien_status = ancien_checks[label]["status"]
+            nouveau_status = check["status"]
+            if ancien_status != nouveau_status:
+                if nouveau_status == "ok":
+                    ameliorations.append(label)
+                elif nouveau_status == "probleme":
+                    degradations.append(label)
+            else:
+                inchanges.append(label)
+
+    print()
+    if ameliorations:
+        for a in ameliorations:
+            ok(f"Amélioré : {a}")
+    if degradations:
+        for d in degradations:
+            probleme(f"Dégradé : {d}")
+    if not ameliorations and not degradations:
+        info("Aucun changement entre les deux rapports")
+
+    diff_score = nouveau["score"] - ancien["score"]
+    if diff_score > 0:
+        ok(f"Score en hausse : +{diff_score} points")
+    elif diff_score < 0:
+        probleme(f"Score en baisse : {diff_score} points")
+    else:
+        info("Score identique")
 
 #    Fonction principale
 def main():
     debut = datetime.datetime.now()
+
+    parser = argparse.ArgumentParser(description="Auditeur de sécurité Linux")
+    parser.add_argument("--comparer", action="store_true", help="Comparer les 2 derniers rapports")
+    args = parser.parse_args()
+
+    if args.comparer:
+        comparer_rapports()
+        return
 
     all_checks = []
     all_checks += audit_users()
