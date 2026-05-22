@@ -219,6 +219,43 @@ def audit_network():
         attention("UFW non disponible")
         resultats.append(Check("Pare-feu UFW", "attention", "UFW absent", 5, 10))
 
+#   Vérification 3 : fail2ban
+    try:
+        sortie = subprocess.check_output(["systemctl", "is-active", "fail2ban"], text=True, stderr=subprocess.DEVNULL).strip()
+        if sortie == "active":
+            ok("fail2ban actif")
+            resultats.append(Check("fail2ban", "ok", "fail2ban actif", 10, 10))
+        else:
+            attention("fail2ban installé mais inactif")
+            resultats.append(Check("fail2ban", "attention", "fail2ban inactif", 5, 10,
+                "Démarrer fail2ban avec : sudo systemctl enable --now fail2ban"))
+    except FileNotFoundError:
+        attention("fail2ban non installé")
+        resultats.append(Check("fail2ban", "attention", "fail2ban absent", 5, 10,
+            "Installer fail2ban pour bloquer automatiquement les IPs suspectes : sudo apt install fail2ban -y (Ubuntu) ou sudo yum install fail2ban -y (CentOS)"))
+
+#   Vérification 4 : Port SSH par défaut
+    sshd = Path("/etc/ssh/sshd_config")
+    if sshd.exists():
+        contenu_ssh = sshd.read_text()
+        port_ssh = 22
+        for ligne in contenu_ssh.splitlines():
+            if ligne.startswith("Port "):
+                try:
+                    port_ssh = int(ligne.split()[1])
+                except ValueError:
+                    pass
+        if port_ssh == 22:
+            attention("SSH utilise le port par défaut (22)")
+            resultats.append(Check("Port SSH", "attention", "Port 22 par défaut", 5, 10,
+                "Changer le port SSH dans /etc/ssh/sshd_config : remplacer 'Port 22' par un port non standard ex: 'Port 2222' puis : sudo systemctl restart sshd et sudo ufw allow 2222/tcp"))
+        else:
+            ok(f"SSH utilise un port non standard ({port_ssh})")
+            resultats.append(Check("Port SSH", "ok", f"Port {port_ssh}", 10, 10))
+    else:
+        attention("Fichier sshd_config introuvable")
+        resultats.append(Check("Port SSH", "attention", "Fichier introuvable", 5, 10))
+
     return resultats
 
 #   Module 3 : Fichiers sensibles
@@ -377,6 +414,48 @@ def audit_ssh_logs():
 
     return resultats
 
+#   Module 6 : SELinux / AppArmor
+def audit_security_modules():
+    titre("MODULE 6 - SELinux / AppArmor")
+    resultats = []
+
+#   Vérification 1 : SELinux (CentOS/RedHat)
+    if Path("/etc/redhat-release").exists():
+        try:
+            sortie = subprocess.check_output(["getenforce"], text=True, stderr=subprocess.DEVNULL).strip()
+            if sortie == "Enforcing":
+                ok("SELinux actif en mode Enforcing")
+                resultats.append(Check("SELinux", "ok", "Enforcing", 10, 10))
+            elif sortie == "Permissive":
+                attention("SELinux en mode Permissive — protection incomplète")
+                resultats.append(Check("SELinux", "attention", "Permissive", 5, 10,
+                    "Passer SELinux en mode Enforcing avec : sudo setenforce 1 et modifier /etc/selinux/config : SELINUX=enforcing"))
+            else:
+                probleme("SELinux désactivé !")
+                resultats.append(Check("SELinux", "probleme", "Désactivé", 0, 10,
+                    "Activer SELinux en modifiant /etc/selinux/config : SELINUX=enforcing puis redémarrer : sudo reboot"))
+        except FileNotFoundError:
+            attention("SELinux non disponible")
+            resultats.append(Check("SELinux", "attention", "Commande getenforce introuvable", 5, 10))
+
+#   Vérification 2 : AppArmor (Ubuntu/Debian)
+    else:
+        try:
+            sortie = subprocess.check_output(["apparmor_status"], text=True, stderr=subprocess.DEVNULL)
+            if "profiles are in enforce mode" in sortie:
+                ok("AppArmor actif")
+                resultats.append(Check("AppArmor", "ok", "AppArmor actif", 10, 10))
+            else:
+                attention("AppArmor inactif ou aucun profil en mode enforce")
+                resultats.append(Check("AppArmor", "attention", "Aucun profil actif", 5, 10,
+                    "Activer AppArmor avec : sudo systemctl enable --now apparmor"))
+        except FileNotFoundError:
+            attention("AppArmor non disponible")
+            resultats.append(Check("AppArmor", "attention", "AppArmor absent", 5, 10,
+                "Installer AppArmor avec : sudo apt install apparmor -y puis : sudo systemctl enable --now apparmor"))
+
+    return resultats
+
 #   Calcul le score global de tous les checks
 def compte_score(all_checks):
     total_points = sum(c.points for c in all_checks)
@@ -522,7 +601,8 @@ def main():
     all_checks += audit_files()
     all_checks += audit_updates()
     all_checks += audit_ssh_logs()
-    
+    all_checks += audit_security_modules()
+
     score, pts, max_pts = compte_score(all_checks)
     titre("Résultat de l'analyse")
     if score >= 80:
