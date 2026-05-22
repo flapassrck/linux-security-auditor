@@ -229,7 +229,7 @@ def audit_network():
             attention("fail2ban installé mais inactif")
             resultats.append(Check("fail2ban", "attention", "fail2ban inactif", 5, 10,
                 "Démarrer fail2ban avec : sudo systemctl enable --now fail2ban"))
-    except FileNotFoundError:
+    except (FileNotFoundError, subprocess.CalledProcessError):
         attention("fail2ban non installé")
         resultats.append(Check("fail2ban", "attention", "fail2ban absent", 5, 10,
             "Installer fail2ban pour bloquer automatiquement les IPs suspectes : sudo apt install fail2ban -y (Ubuntu) ou sudo yum install fail2ban -y (CentOS)"))
