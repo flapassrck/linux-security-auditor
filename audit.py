@@ -516,32 +516,13 @@ def main():
         comparer_rapports()
         return
 
-    # all_checks = []
-    # all_checks += audit_users()
-    # all_checks += audit_network()
-    # all_checks += audit_files()
-    # all_checks += audit_updates()
-    # all_checks += audit_ssh_logs()
-
-    modules = [
-        ("MODULE 1 - Utilisateurs & Accès", audit_users),
-        ("MODULE 2 - Réseaux & Ports",      audit_network),
-        ("MODULE 3 - Fichiers sensibles",    audit_files),
-        ("MODULE 4 - Mises à jour",          audit_updates),
-        ("MODULE 5 - Brute Force SSH",       audit_ssh_logs),
-    ]
-
     all_checks = []
-    total = len(modules)
-
-    for i, (nom, fonction) in enumerate(modules, 1):
-        all_checks += fonction()
-        pct = int((i / total) * 100)
-        barre = "█" * pct + "░" * (100 - pct)
-        print(f"\r{CYAN}{GRAS}[{barre}] {pct}%{RESET}", end="", flush=True)
-
-    print()
-
+    all_checks += audit_users()
+    all_checks += audit_network()
+    all_checks += audit_files()
+    all_checks += audit_updates()
+    all_checks += audit_ssh_logs()
+    
     score, pts, max_pts = compte_score(all_checks)
     titre("Résultat de l'analyse")
     if score >= 80:
