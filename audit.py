@@ -412,7 +412,7 @@ def audit_ssh_logs():
         attention("Logs innaccessibles - relance en sudo")
         resultats.append(Check("Brute force SSH", "attention", "Nécessite de relancer en sudo", 5, 10))
 
-    #   Vérification 2 : IPs les plus actives
+#   Vérification 2 : IPs les plus actives
     if log_trouve and tentatives:
         from collections import Counter
         ips = []
