@@ -24,6 +24,7 @@ Sur CentOS :
 ### 2. Cloner le projet
 
     git clone https://github.com/flapassrck/linux-security-auditor.git
+##### puis
     cd linux-security-auditor
 
 ### 3. Installer pip3
