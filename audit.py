@@ -475,6 +475,37 @@ def audit_security_modules():
             resultats.append(Check("AppArmor", "attention", "AppArmor absent", 5, 10,
                 "Installer AppArmor avec : sudo apt install apparmor -y puis : sudo systemctl enable --now apparmor"))
 
+#   Vérification 3 : logs de sécurité actifs
+    try:
+        sortie = subprocess.check_output(
+            ["systemctl", "is-active", "rsyslog"],
+            text=True, stderr=subprocess.DEVNULL
+        ).strip()
+        if sortie == "active":
+            ok("Service de logs rsyslog actif")
+            resultats.append(Check("Logs système", "ok", "rsyslog actif", 10, 10))
+        else:
+            attention("rsyslog inactif")
+            resultats.append(Check("Logs système", "attention", "rsyslog inactif", 5, 10,
+                "Activer les logs avec : sudo systemctl enable --now rsyslog"))
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        try:
+            sortie = subprocess.check_output(
+                ["systemctl", "is-active", "systemd-journald"],
+                text=True, stderr=subprocess.DEVNULL
+            ).strip()
+            if sortie == "active":
+                ok("Service de logs journald actif")
+                resultats.append(Check("Logs système", "ok", "journald actif", 10, 10))
+            else:
+                attention("journald inactif")
+                resultats.append(Check("Logs système", "attention", "journald inactif", 5, 10,
+                    "Activer les logs avec : sudo systemctl enable --now systemd-journald"))
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            probleme("Aucun service de logs détecté")
+            resultats.append(Check("Logs système", "probleme", "Aucun service de logs", 0, 10,
+                "Installer rsyslog avec : sudo apt install rsyslog -y (Ubuntu) ou sudo yum install rsyslog -y (CentOS)"))
+
     return resultats
 
 #   Calcul le score global de tous les checks
