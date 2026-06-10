@@ -657,17 +657,29 @@ def main():
         probleme("Impossible de joindre le serveur de licences")
         return
 
+    if args.comparer and plan == "free":
+        probleme("La comparaison de rapports est réservée au plan Pro")
+        return
+    
     if args.comparer:
         comparer_rapports()
         return
 
-    all_checks = []
-    all_checks += audit_users()
-    all_checks += audit_network()
-    all_checks += audit_files()
-    all_checks += audit_updates()
-    all_checks += audit_ssh_logs()
-    all_checks += audit_security_modules()
+    if plan == "free":
+        info("Plan FREE — modules limités (3/6)")
+        all_checks = []
+        all_checks += audit_users()
+        all_checks += audit_network()
+        all_checks += audit_files()
+    else:
+        info("Plan PRO — tous les modules")
+        all_checks = []
+        all_checks += audit_users()
+        all_checks += audit_network()
+        all_checks += audit_files()
+        all_checks += audit_updates()
+        all_checks += audit_ssh_logs()
+        all_checks += audit_security_modules()
 
     score, pts, max_pts = compte_score(all_checks)
     titre("Résultat de l'analyse")
