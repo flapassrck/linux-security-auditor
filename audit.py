@@ -640,9 +640,22 @@ def main():
     debut = datetime.datetime.now()
 
     parser = argparse.ArgumentParser(description="Auditeur de sécurité Linux")
+    parser.add_argument("--cle", help="Clé de licence", required=True)
     parser.add_argument("--comparer", action="store_true", help="Comparer les 2 derniers rapports")
-    parser.add_argument("--cle", help="Clé de licence pour envoyer le rapport au dashboard")
     args = parser.parse_args()
+
+    # Vérification de la clé
+    import requests
+    try:
+        res = requests.post("http://192.168.1.172:5000/api/verifier-cle", json={"cle_licence": args.cle})
+        if res.status_code != 200:
+            probleme("Clé de licence invalide — créez un compte sur le dashboard")
+            return
+        plan = res.json().get("plan")
+        ok(f"Clé valide — Plan {plan.upper()}")
+    except requests.exceptions.ConnectionError:
+        probleme("Impossible de joindre le serveur de licences")
+        return
 
     if args.comparer:
         comparer_rapports()
@@ -668,30 +681,28 @@ def main():
     rapport, chemin_historique = generate_html_report(all_checks, score, socket.gethostname())
     info(f"Rapport généré : {rapport.resolve()}")
 
-    if args.cle:
-        import requests
-        try:
-            with open("rapport_audit.html", "r", encoding="utf-8") as f:
-                html = f.read()
-            with open(f"historique/{chemin_historique.name.replace('.html', '.json')}", "r", encoding="utf-8") as f:
-                donnees = json.load(f)
-            res = requests.post("http://192.168.1.172:5000/api/envoyer-rapport", json={
-                "cle_licence": args.cle,
-                "hostname": socket.gethostname(),
-                "score": score,
-                "html": html,
-                "checks": donnees["checks"]
-            })
-            if res.status_code == 201:
-                ok("Rapport envoyé au dashboard !")
-            elif res.status_code == 403:
-                probleme("Clé de licence invalide ou compte inactif !")
-            else:
-                attention(f"Erreur envoi rapport : {res.status_code} — {res.json().get('error')}")
-        except requests.exceptions.ConnectionError:
-            probleme("Impossible de joindre le serveur — vérifiez que Flask tourne")
-        except Exception as e:
-            probleme(f"Erreur inattendue : {e}")
+    try:
+        with open("rapport_audit.html", "r", encoding="utf-8") as f:
+            html = f.read()
+        with open(f"historique/{chemin_historique.name.replace('.html', '.json')}", "r", encoding="utf-8") as f:
+            donnees = json.load(f)
+        res = requests.post("http://192.168.1.172:5000/api/envoyer-rapport", json={
+            "cle_licence": args.cle,
+            "hostname": socket.gethostname(),
+            "score": score,
+            "html": html,
+            "checks": donnees["checks"]
+        })
+        if res.status_code == 201:
+            ok("Rapport envoyé au dashboard !")
+        elif res.status_code == 403:
+            probleme("Clé de licence invalide ou compte inactif !")
+        else:
+            attention(f"Erreur envoi rapport : {res.status_code} — {res.json().get('error')}")
+    except requests.exceptions.ConnectionError:
+        probleme("Impossible de joindre le serveur — rapport non envoyé au dashboard")
+    except Exception as e:
+        probleme(f"Erreur inattendue : {e}")
 
     fin = datetime.datetime.now()
     duree = (fin - debut).total_seconds()
