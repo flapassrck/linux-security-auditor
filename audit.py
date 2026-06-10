@@ -578,7 +578,7 @@ def generate_html_report(all_checks, score, hostname):
         "checks": donnees
     }, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    return chemin_rapport
+    return chemin_rapport, chemin_historique
 
 #   Comparer les deux derniers rapports
 def comparer_rapports():
@@ -641,6 +641,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="Auditeur de sécurité Linux")
     parser.add_argument("--comparer", action="store_true", help="Comparer les 2 derniers rapports")
+    parser.add_argument("--cle", help="Clé de licence pour envoyer le rapport au dashboard")
     args = parser.parse_args()
 
     if args.comparer:
@@ -664,8 +665,29 @@ def main():
     else:
         probleme(f"Score final : {score}/100 — Niveau critique !")
 
-    rapport = generate_html_report(all_checks, score, socket.gethostname())
+    rapport, chemin_historique = generate_html_report(all_checks, score, socket.gethostname())
     info(f"Rapport généré : {rapport.resolve()}")
+
+    if args.cle:
+        import requests
+        try:
+            with open("rapport_audit.html", "r", encoding="utf-8") as f:
+                html = f.read()
+            with open(f"historique/{chemin_historique.name.replace('.html', '.json')}", "r", encoding="utf-8") as f:
+                donnees = json.load(f)
+            res = requests.post("http://192.168.1.172:5000/api/envoyer-rapport", json={
+                "cle_licence": args.cle,
+                "hostname": socket.gethostname(),
+                "score": score,
+                "html": html,
+                "checks": donnees["checks"]
+            })
+            if res.status_code == 201:
+                ok("Rapport envoyé au dashboard !")
+            else:
+                attention(f"Erreur envoi rapport : {res.json().get('error')}")
+        except Exception as e:
+            attention(f"Impossible d'envoyer le rapport : {e}")
 
     fin = datetime.datetime.now()
     duree = (fin - debut).total_seconds()
