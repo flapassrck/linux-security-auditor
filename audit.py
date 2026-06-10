@@ -684,10 +684,14 @@ def main():
             })
             if res.status_code == 201:
                 ok("Rapport envoyé au dashboard !")
+            elif res.status_code == 403:
+                probleme("Clé de licence invalide ou compte inactif !")
             else:
-                attention(f"Erreur envoi rapport : {res.json().get('error')}")
+                attention(f"Erreur envoi rapport : {res.status_code} — {res.json().get('error')}")
+        except requests.exceptions.ConnectionError:
+            probleme("Impossible de joindre le serveur — vérifiez que Flask tourne")
         except Exception as e:
-            attention(f"Impossible d'envoyer le rapport : {e}")
+            probleme(f"Erreur inattendue : {e}")
 
     fin = datetime.datetime.now()
     duree = (fin - debut).total_seconds()
