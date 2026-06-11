@@ -647,7 +647,7 @@ def main():
     # Vérification de la clé
     import requests
     try:
-        res = requests.post("http://192.168.1.172:5000/api/verifier-cle", json={"cle_licence": args.cle})
+        res = requests.post("https://web-production-eda10.up.railway.app/api/verifier-cle", json={"cle_licence": args.cle})
         if res.status_code != 200:
             probleme("Clé de licence invalide — créez un compte sur le dashboard")
             return
@@ -698,7 +698,7 @@ def main():
             html = f.read()
         with open(f"historique/{chemin_historique.name.replace('.html', '.json')}", "r", encoding="utf-8") as f:
             donnees = json.load(f)
-        res = requests.post("http://192.168.1.172:5000/api/envoyer-rapport", json={
+        res = requests.post("https://web-production-eda10.up.railway.app/api/envoyer-rapport", json={
             "cle_licence": args.cle,
             "hostname": socket.gethostname(),
             "score": score,
