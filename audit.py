@@ -578,7 +578,7 @@ def generate_html_report(all_checks, score, hostname):
         "checks": donnees
     }, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    return chemin_rapport
+    return chemin_rapport, chemin_historique
 
 #   Comparer les deux derniers rapports
 def comparer_rapports():
