@@ -578,7 +578,7 @@ def generate_html_report(all_checks, score, hostname):
         "checks": donnees
     }, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    return chemin_rapport, chemin_historique
+    return chemin_rapport
 
 #   Comparer les deux derniers rapports
 def comparer_rapports():
@@ -640,46 +640,20 @@ def main():
     debut = datetime.datetime.now()
 
     parser = argparse.ArgumentParser(description="Auditeur de sécurité Linux")
-    parser.add_argument("--cle", help="Clé de licence", required=True)
     parser.add_argument("--comparer", action="store_true", help="Comparer les 2 derniers rapports")
     args = parser.parse_args()
 
-    # Vérification de la clé
-    import requests
-    try:
-        res = requests.post("https://web-production-eda10.up.railway.app/api/verifier-cle", json={"cle_licence": args.cle})
-        if res.status_code != 200:
-            probleme("Clé de licence invalide — créez un compte sur le dashboard")
-            return
-        plan = res.json().get("plan")
-        ok(f"Clé valide — Plan {plan.upper()}")
-    except requests.exceptions.ConnectionError:
-        probleme("Impossible de joindre le serveur de licences")
-        return
-
-    if args.comparer and plan == "free":
-        probleme("La comparaison de rapports est réservée au plan Pro")
-        return
-    
     if args.comparer:
         comparer_rapports()
         return
 
-    if plan == "free":
-        info("Plan FREE — modules limités (3/6)")
-        all_checks = []
-        all_checks += audit_users()
-        all_checks += audit_network()
-        all_checks += audit_files()
-    else:
-        info("Plan PRO — tous les modules")
-        all_checks = []
-        all_checks += audit_users()
-        all_checks += audit_network()
-        all_checks += audit_files()
-        all_checks += audit_updates()
-        all_checks += audit_ssh_logs()
-        all_checks += audit_security_modules()
+    all_checks = []
+    all_checks += audit_users()
+    all_checks += audit_network()
+    all_checks += audit_files()
+    all_checks += audit_updates()
+    all_checks += audit_ssh_logs()
+    all_checks += audit_security_modules()
 
     score, pts, max_pts = compte_score(all_checks)
     titre("Résultat de l'analyse")
@@ -690,31 +664,8 @@ def main():
     else:
         probleme(f"Score final : {score}/100 — Niveau critique !")
 
-    rapport, chemin_historique = generate_html_report(all_checks, score, socket.gethostname())
+    rapport = generate_html_report(all_checks, score, socket.gethostname())
     info(f"Rapport généré : {rapport.resolve()}")
-
-    try:
-        with open("rapport_audit.html", "r", encoding="utf-8") as f:
-            html = f.read()
-        with open(f"historique/{chemin_historique.name.replace('.html', '.json')}", "r", encoding="utf-8") as f:
-            donnees = json.load(f)
-        res = requests.post("https://web-production-eda10.up.railway.app/api/envoyer-rapport", json={
-            "cle_licence": args.cle,
-            "hostname": socket.gethostname(),
-            "score": score,
-            "html": html,
-            "checks": donnees["checks"]
-        })
-        if res.status_code == 201:
-            ok("Rapport envoyé au dashboard !")
-        elif res.status_code == 403:
-            probleme("Clé de licence invalide ou compte inactif !")
-        else:
-            attention(f"Erreur envoi rapport : {res.status_code} — {res.json().get('error')}")
-    except requests.exceptions.ConnectionError:
-        probleme("Impossible de joindre le serveur — rapport non envoyé au dashboard")
-    except Exception as e:
-        probleme(f"Erreur inattendue : {e}")
 
     fin = datetime.datetime.now()
     duree = (fin - debut).total_seconds()
