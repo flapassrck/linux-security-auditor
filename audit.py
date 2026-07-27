@@ -664,7 +664,7 @@ def main():
     else:
         probleme(f"Score final : {score}/100 — Niveau critique !")
 
-    rapport = generate_html_report(all_checks, score, socket.gethostname())
+    rapport, chemin_historique = generate_html_report(all_checks, score, socket.gethostname())
     info(f"Rapport généré : {rapport.resolve()}")
 
     fin = datetime.datetime.now()
