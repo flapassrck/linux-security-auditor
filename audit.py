@@ -37,8 +37,7 @@ def probleme(msg):
 def info(msg):
     print(f"{CYAN}ℹ️ {RESET} {msg}")
 def titre(msg):
-    print(f"\n{GRAS}{CYAN}[ {msg} ]{RESET}")
-    print(f"{CYAN}{'-'*len(msg+4)}{RESET}")
+    print(f"{GRAS}{CYAN}{'='*50}\n{msg.center(50)}\n{'='*50}{RESET}")
 
 #   Résultat d'une vérification (status, détails, points obtenus, points max)
 class Check:
