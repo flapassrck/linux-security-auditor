@@ -1,47 +1,58 @@
 # Linux Security Auditor
 
 Script Python d'audit de sécurité pour serveurs Linux.
-Il génère un rapport HTML avec un score de sécurité global.
+Il analyse la machine, génère un rapport HTML et calcule un score de sécurité global.
 
 ## Ce que le script vérifie
 
-- **Utilisateurs et accès** : UID 0, mots de passe vides, groupe sudo, connexion SSH root
-- **Réseau et ports** : ports dangereux, pare-feu UFW
-- **Fichiers sensibles** : permissions de `/etc/passwd`, `/etc/shadow`...
-- **Modules de sécurité** : AppArmor (Ubuntu/Debian), SELinux (CentOS)
-- **Mises à jour de sécurité** : `apt` sur Ubuntu/Debian, `yum` sur CentOS
-- **Brute force SSH** : tentatives de connexion échouées
+| Catégorie | Détail |
+|---|---|
+| Utilisateurs et accès | UID 0, mots de passe vides, groupe sudo, connexion SSH root |
+| Réseau | ports dangereux, pare-feu UFW |
+| Fichiers sensibles | permissions de `/etc/passwd`, `/etc/shadow`... |
+| Modules de sécurité | AppArmor (Ubuntu/Debian), SELinux (CentOS/RHEL) |
+| Mises à jour | mises à jour de sécurité en attente (`apt` ou `yum`) |
+| Brute force SSH | tentatives de connexion échouées |
 
 ## Prérequis
 
-- Serveur Linux (Ubuntu, Debian, CentOS...)
-- Python 3
-- Droits sudo
+- Un serveur Linux (Ubuntu, Debian, CentOS, Rocky, Alma, Fedora...)
+- Python 3 (déjà présent par défaut sur ces systèmes)
+- Un accès `sudo`
 
 ## Installation
+
+### 1. Installer git et jinja2
 
 Ubuntu / Debian :
 
 ```bash
+sudo apt update
 sudo apt install git python3-jinja2 -y
 ```
 
-CentOS :
+CentOS / Rocky / Alma / Fedora :
 
 ```bash
-sudo yum install git python3-jinja2 -y
+sudo dnf install git python3-jinja2 -y
 ```
 
-Puis récupérer le projet :
+> Sur CentOS 7, remplace `dnf` par `yum`. Si `python3-jinja2` est introuvable :
+> ```bash
+> sudo yum install python3-pip -y
+> sudo pip3 install jinja2
+> ```
+
+### 2. Récupérer le projet
 
 ```bash
 git clone https://github.com/flapassrck/linux-security-auditor.git
 cd linux-security-auditor
 ```
 
-## Configuration : whitelist des admins
+## Configuration
 
-Avant le premier audit, modifie le fichier `whitelist.json` pour définir les administrateurs autorisés :
+Avant le premier audit, modifie `whitelist.json` pour y mettre les administrateurs autorisés :
 
 ```json
 {
@@ -49,27 +60,29 @@ Avant le premier audit, modifie le fichier `whitelist.json` pour définir les ad
 }
 ```
 
-Tout utilisateur du groupe sudo qui n'est pas dans cette liste est signalé comme suspect.
+Tout membre du groupe sudo (ou wheel) absent de cette liste est signalé comme suspect.
+Remplace `florian` par ton nom d'utilisateur (commande `whoami`).
 
 ## Utilisation
 
-Depuis le dossier du projet, lance l'audit :
+> **Important :** lance toujours le script depuis le dossier du projet, sinon `whitelist.json` et le template sont introuvables.
+
+### Lancer un audit
 
 ```bash
 sudo python3 audit.py
 ```
 
-Le rapport `rapport_audit.html` est généré dans le dossier du projet.
-Une copie est aussi enregistrée dans `historique/` (voir plus bas).
+Le rapport `rapport_audit.html` est créé dans le dossier du projet.
 
 ## Historique des rapports
 
-Chaque audit crée deux fichiers dans le dossier `historique/` :
+Le dossier `historique/` n'existe pas au départ : il apparaît après le premier audit.
 
-- un fichier HTML pour la consultation visuelle
-- un fichier JSON pour la comparaison entre deux audits
+Chaque audit y enregistre deux fichiers :
 
-Exemple :
+- un fichier **HTML** pour la consultation
+- un fichier **JSON** pour la comparaison entre deux audits
 
 ```
 historique/
@@ -89,21 +102,49 @@ Il faut avoir lancé au moins 2 audits pour utiliser la comparaison.
 
 ## Récupérer le rapport sur Windows
 
-Depuis PowerShell :
+### Option 1 : PowerShell
+
+À lancer sur ton PC Windows (pas sur le serveur) :
 
 ```powershell
-scp username@192.168.x.x:/home/username/linux-security-auditor/rapport_audit.html C:\Users\username\Desktop\
+scp username@192.168.x.x:/home/username/linux-security-auditor/rapport_audit.html C:\Users\TonNom\Desktop\
 ```
 
-Ou depuis VS Code connecté en Remote SSH :
+Valeurs à remplacer :
+
+| Valeur | À mettre | Comment la trouver (sur le serveur) |
+|---|---|---|
+| `username` (2 fois) | ton utilisateur Linux | `whoami` |
+| `192.168.x.x` | l'adresse IP du serveur | `hostname -I` |
+| `/home/username/linux-security-auditor` | le dossier du projet | `pwd` |
+| `C:\Users\TonNom\Desktop\` | le dossier de destination sur Windows | ton Bureau |
+
+Si SSH n'utilise pas le port 22, ajoute `-P NUMERO_PORT` juste après `scp`.
+
+### Option 2 : VS Code (Remote SSH)
 
 1. Clic droit sur `rapport_audit.html`
 2. Cliquer sur **Download**
 3. Ouvrir le fichier dans le navigateur
 
+## Dépannage
+
+| Problème | Solution |
+|---|---|
+| `ModuleNotFoundError: No module named 'jinja2'` | Refaire l'étape d'installation de `python3-jinja2` (ou `pip3 install jinja2` sur CentOS 7) |
+| `whitelist.json introuvable` | Lancer le script depuis le dossier `linux-security-auditor` |
+| `scp` : `Permission denied` sur le rapport | Sur le serveur : `sudo chown $USER rapport_audit.html` |
+| Résultats incomplets ou « inactif » partout | Lancer avec `sudo` : sans les droits root, plusieurs vérifications échouent |
+| AppArmor ou SELinux signalé « absent » | Normal si ta distribution utilise l'autre module de sécurité |
+
 ## Sécurité
 
-Le rapport contient des informations sensibles sur ton serveur (utilisateurs, ports ouverts, failles). Ne le partage pas publiquement et ne le commit pas sur GitHub (ajoute `rapport_audit.html` et `historique/` à ton `.gitignore`).
+Le rapport contient des informations sensibles sur ton serveur (utilisateurs, ports ouverts, failles). Ne le partage pas et ne le commit pas sur GitHub. Ajoute ceci à ton `.gitignore` :
+
+```
+rapport_audit.html
+historique/
+```
 
 ## Structure du projet
 
@@ -114,6 +155,7 @@ linux-security-auditor/
 ├── style.css         → style du rapport
 ├── whitelist.json    → admins autorisés
 ├── requirements.txt  → dépendances Python (jinja2)
-├── README.md         → ce fichier
-└── historique/       → rapports générés automatiquement
+└── README.md         → ce fichier
 ```
+
+Le dossier `historique/` est créé par le script après le premier audit.
