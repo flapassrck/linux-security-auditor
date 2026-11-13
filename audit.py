@@ -462,7 +462,7 @@ def audit_security_modules():
 #   Vérification 2 : AppArmor (Ubuntu/Debian)
     else:
         try:
-            sortie = subprocess.check_output(["apparmor_status"], text=True, stderr=subprocess.DEVNULL)
+            sortie = subprocess.run(["apparmor_status"], text=True, stderr=subprocess.DEVNULL)
             if "profiles are in enforce mode" in sortie:
                 ok("AppArmor actif")
                 resultats.append(Check("AppArmor", "ok", "AppArmor actif", 10, 10))
