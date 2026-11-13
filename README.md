@@ -1,120 +1,149 @@
 # Linux Security Auditor
 
 Script Python d'audit de sécurité pour serveurs Linux.
-Génère un rapport HTML avec un score de sécurité global.
+Il génère un rapport HTML avec un score de sécurité global.
+
+## Ce que le script vérifie
+
+- **Utilisateurs et accès** : UID 0, mots de passe vides, groupe sudo, connexion SSH root
+- **Réseau et ports** : ports dangereux, pare-feu UFW
+- **Fichiers sensibles** : permissions de `/etc/passwd`, `/etc/shadow`...
+- **Modules de sécurité** : AppArmor (Ubuntu/Debian), SELinux (CentOS)
+- **Mises à jour de sécurité** : `apt` sur Ubuntu/Debian, `yum` sur CentOS
+- **Brute force SSH** : tentatives de connexion échouées
 
 ## Prérequis
 
 - Python 3
-- Serveur Linux (CentOS, Ubuntu...)
+- Serveur Linux (Ubuntu, Debian, CentOS...)
 - Droits sudo
 
 ## Installation
 
 ### 1. Installer git
 
-Sur Ubuntu :
+Ubuntu / Debian :
 
-    sudo apt install git -y
+```bash
+sudo apt install git -y
+```
 
-Sur CentOS :
+CentOS :
 
-    sudo yum install git -y
+```bash
+sudo yum install git -y
+```
 
-### 2. Cloner (installer) le script
+### 2. Cloner le projet
 
-    git clone https://github.com/flapassrck/linux-security-auditor.git
-##### 2.1 Se rendre dans le dossier
-    cd linux-security-auditor
+```bash
+git clone https://github.com/flapassrck/linux-security-auditor.git
+cd linux-security-auditor
+```
 
 ### 3. Installer pip3
 
-Sur Ubuntu :
+Ubuntu / Debian :
 
-    sudo apt install python3-pip --fix-missing -y
+```bash
+sudo apt install python3-pip --fix-missing -y
+```
 
-Sur CentOS :
+CentOS :
 
-    sudo yum install python3-pip -y
+```bash
+sudo yum install python3-pip -y
+```
 
 ### 4. Installer les dépendances
 
-Sur Ubuntu :
+Ubuntu / Debian :
 
-    sudo pip3 install -r requirements.txt --break-system-packages
+```bash
+sudo pip3 install -r requirements.txt --break-system-packages
+```
 
-Sur CentOS :
+CentOS :
 
-    sudo pip3 install -r requirements.txt
+```bash
+sudo pip3 install -r requirements.txt
+```
+
+## Configuration : whitelist des admins
+
+Avant le premier audit, modifie le fichier `whitelist.json` pour définir les administrateurs autorisés :
+
+```json
+{
+    "admins_autorises": ["florian", "root"]
+}
+```
+
+Tout utilisateur du groupe sudo qui n'est pas dans cette liste est signalé comme suspect.
 
 ## Utilisation
 
-Se placer dans le dossier du projet :
+Depuis le dossier du projet, lance l'audit :
 
-    cd linux-security-auditor
+```bash
+sudo python3 audit.py
+```
 
-Lancer le script :
-
-    sudo python3 audit.py
-
-Le rapport rapport_audit.html est généré dans le dossier du projet.
-
-Comparer les 2 derniers rapports :
-
-    python3 audit.py --comparer
-
-## Whitelist des admins
-
-Modifier le fichier whitelist.json pour définir les administrateurs autorisés :
-
-    {
-        "admins_autorises": ["florian", "root"]
-    }
-
-Tout utilisateur dans le groupe sudo absent de cette liste sera signalé comme suspect.
+Le rapport `rapport_audit.html` est généré dans le dossier du projet.
+Une copie est aussi enregistrée dans `historique/` (voir plus bas).
 
 ## Historique des rapports
 
-Chaque audit génère automatiquement deux fichiers dans le dossier historique/ :
-- Un fichier HTML pour la consultation visuelle
-- Un fichier JSON pour la comparaison entre deux audits
+Chaque audit crée deux fichiers dans le dossier `historique/` :
+
+- un fichier HTML pour la consultation visuelle
+- un fichier JSON pour la comparaison entre deux audits
 
 Exemple :
 
-    historique/
-    ├── rapport_20260521_183045.html
-    ├── rapport_20260521_183045.json
-    ├── rapport_20260522_091200.html
-    └── rapport_20260522_091200.json
+```
+historique/
+├── rapport_20260521_183045.html
+├── rapport_20260521_183045.json
+├── rapport_20260522_091200.html
+└── rapport_20260522_091200.json
+```
 
-Il faut avoir lancé au moins 2 audits pour pouvoir utiliser la comparaison.
+### Comparer les deux derniers audits
+
+```bash
+python3 audit.py --comparer
+```
+
+Il faut avoir lancé au moins 2 audits pour utiliser la comparaison.
 
 ## Récupérer le rapport sur Windows
 
-Depuis PowerShell Windows :
+Depuis PowerShell :
 
-    scp username@192.168.x.x:/home/username/linux-security-auditor/rapport_audit.html C:\Users\username\Desktop\
+```powershell
+scp username@192.168.x.x:/home/username/linux-security-auditor/rapport_audit.html C:\Users\username\Desktop\
+```
 
 Ou depuis VS Code connecté en Remote SSH :
-- Clic droit sur rapport_audit.html
-- Cliquer sur Download
-- Ouvrir dans le navigateur
 
-## Ce que le script vérifie
+1. Clic droit sur `rapport_audit.html`
+2. Cliquer sur **Download**
+3. Ouvrir le fichier dans le navigateur
 
-- Utilisateurs et accès (UID 0, mots de passe vides, sudo, SSH root)
-- Réseau et ports (ports dangereux, pare-feu UFW)
-- Fichiers sensibles (permissions /etc/passwd, /etc/shadow...)
-- Mises à jour de sécurité (apt sur Ubuntu, yum sur CentOS)
-- Tentatives de brute force SSH
+## Sécurité
+
+Le rapport contient des informations sensibles sur ton serveur (utilisateurs, ports ouverts, failles). Ne le partage pas publiquement et ne le commit pas sur GitHub (ajoute `rapport_audit.html` et `historique/` à ton `.gitignore`).
 
 ## Structure du projet
 
-    linux-security-auditor/
-    ├── audit.py          → script principal
-    ├── template.html     → template du rapport
-    ├── style.css         → style du rapport
-    ├── whitelist.json    → admins autorisés
-    ├── requirements.txt  → dépendances Python
-    ├── README.md         → ce fichier
-    └── historique/       → rapports générés automatiquement
+```
+linux-security-auditor/
+├── audit.py          → script principal
+├── template.html     → template du rapport
+├── style.css         → style du rapport
+├── whitelist.json    → admins autorisés
+├── requirements.txt  → dépendances Python
+├── README.md         → ce fichier
+└── historique/       → rapports générés automatiquement
+```
