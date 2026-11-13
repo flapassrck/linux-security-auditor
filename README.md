@@ -8,15 +8,27 @@ Il analyse la machine, génère un rapport HTML et calcule un score de sécurit�
 | Catégorie | Détail |
 |---|---|
 | Utilisateurs et accès | UID 0, mots de passe vides, groupe sudo, connexion SSH root |
-| Réseau | ports dangereux, pare-feu UFW |
+| Réseau | ports dangereux, pare-feu UFW, service Fail2ban |
 | Fichiers sensibles | permissions de `/etc/passwd`, `/etc/shadow`... |
-| Modules de sécurité | AppArmor (Ubuntu/Debian), SELinux (CentOS/RHEL) |
+| Modules de sécurité | AppArmor (Debian/Ubuntu), SELinux (CentOS/RHEL) |
 | Mises à jour | mises à jour de sécurité en attente (`apt` ou `yum`) |
 | Brute force SSH | tentatives de connexion échouées |
 
+> Le pare-feu vérifié est UFW. La détection de `firewalld` (CentOS, Fedora) sera ajoutée plus tard.
+
+## Compatibilité
+
+| Famille | Distributions | Statut |
+|---|---|---|
+| Debian | Debian, Ubuntu | Compatible |
+| Red Hat | CentOS, Rocky, Alma, Fedora | Compatible (pare-feu `firewalld` non détecté pour l'instant) |
+| Autres | Arch, openSUSE, Alpine... | Non pris en charge (pas de `apt` ni de `yum`) |
+
+Une distribution avec `systemd` est nécessaire.
+
 ## Prérequis
 
-- Un serveur Linux (Ubuntu, Debian, CentOS, Rocky, Alma, Fedora...)
+- Un serveur Linux Debian/Ubuntu ou CentOS/Rocky/Alma/Fedora
 - Python 3 (déjà présent par défaut sur ces systèmes)
 - Un accès `sudo`
 
@@ -24,7 +36,7 @@ Il analyse la machine, génère un rapport HTML et calcule un score de sécurit�
 
 ### 1. Installer git et jinja2
 
-Ubuntu / Debian :
+Debian / Ubuntu :
 
 ```bash
 sudo apt update
@@ -131,11 +143,12 @@ Si SSH n'utilise pas le port 22, ajoute `-P NUMERO_PORT` juste après `scp`.
 
 | Problème | Solution |
 |---|---|
-| `ModuleNotFoundError: No module named 'jinja2'` | Refaire l'étape d'installation de `python3-jinja2` (ou `pip3 install jinja2` sur CentOS 7) |
+| `ModuleNotFoundError: No module named 'jinja2'` | Refaire l'installation de `python3-jinja2` (ou `pip3 install jinja2` sur CentOS 7) |
 | `whitelist.json introuvable` | Lancer le script depuis le dossier `linux-security-auditor` |
 | `scp` : `Permission denied` sur le rapport | Sur le serveur : `sudo chown $USER rapport_audit.html` |
 | Résultats incomplets ou « inactif » partout | Lancer avec `sudo` : sans les droits root, plusieurs vérifications échouent |
 | AppArmor ou SELinux signalé « absent » | Normal si ta distribution utilise l'autre module de sécurité |
+| « Pas de pare-feu » sur CentOS/Fedora | Normal : seul UFW est détecté pour l'instant, pas `firewalld` |
 
 ## Sécurité
 
@@ -145,6 +158,10 @@ Le rapport contient des informations sensibles sur ton serveur (utilisateurs, po
 rapport_audit.html
 historique/
 ```
+
+## Évolutions prévues
+
+- [ ] Détection du pare-feu `firewalld`
 
 ## Structure du projet
 
