@@ -14,59 +14,29 @@ Il génère un rapport HTML avec un score de sécurité global.
 
 ## Prérequis
 
-- Python 3
 - Serveur Linux (Ubuntu, Debian, CentOS...)
+- Python 3
 - Droits sudo
 
 ## Installation
 
-### 1. Installer git
-
 Ubuntu / Debian :
 
 ```bash
-sudo apt install git -y
+sudo apt install git python3-jinja2 -y
 ```
 
 CentOS :
 
 ```bash
-sudo yum install git -y
+sudo yum install git python3-jinja2 -y
 ```
 
-### 2. Cloner le projet
+Puis récupérer le projet :
 
 ```bash
 git clone https://github.com/flapassrck/linux-security-auditor.git
 cd linux-security-auditor
-```
-
-### 3. Installer pip3
-
-Ubuntu / Debian :
-
-```bash
-sudo apt install python3-pip --fix-missing -y
-```
-
-CentOS :
-
-```bash
-sudo yum install python3-pip -y
-```
-
-### 4. Installer les dépendances
-
-Ubuntu / Debian :
-
-```bash
-sudo pip3 install -r requirements.txt --break-system-packages
-```
-
-CentOS :
-
-```bash
-sudo pip3 install -r requirements.txt
 ```
 
 ## Configuration : whitelist des admins
@@ -143,7 +113,7 @@ linux-security-auditor/
 ├── template.html     → template du rapport
 ├── style.css         → style du rapport
 ├── whitelist.json    → admins autorisés
-├── requirements.txt  → dépendances Python
+├── requirements.txt  → dépendances Python (jinja2)
 ├── README.md         → ce fichier
 └── historique/       → rapports générés automatiquement
 ```
