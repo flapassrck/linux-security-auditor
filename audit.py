@@ -124,17 +124,13 @@ def audit_users():
                 0, 10,
                 "Cet utilisateur a les droits administrateur sans être dans la whitelist. Le retirer du groupe sudo avec : sudo deluser nom_user sudo (Ubuntu) ou sudo gpasswd -d nom_user wheel (CentOS)"
             ))
-        elif sudo_membres:
-            attention(f"Membre(s) du groupe {groupe_trouve} : {', '.join(sudo_membres)}")
-            resultats.append(Check(
-                "Groupe sudo", "attention",
-                f"Membres : {', '.join(sudo_membres)}",
-                5, 10,
-                "Vérifier que tous les membres de ce groupe ont bien besoin des droits administrateur. Mettre à jour la whitelist.json si nécessaire."
-            ))
         else:
-            ok(f"Groupe {groupe_trouve} vide")
-            resultats.append(Check(f"Groupe sudo", "ok", "Aucun membre", 10, 10))
+            ok(f"Membre(s) du groupe {groupe_trouve} : {', '.join(sudo_membres) or 'aucun'}")
+            resultats.append(Check(
+                "Groupe sudo", "ok",
+                f"Membres autorisés : {', '.join(sudo_membres) or 'aucun'}",
+                10, 10
+            ))
 
 #   Vérification 4 : Connexions SSH root
     sshd_config = Path("/etc/ssh/sshd_config")
