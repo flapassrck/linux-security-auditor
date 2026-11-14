@@ -151,4 +151,23 @@ Si SSH n'utilise pas le port 22, ajoute `-P NUMERO_PORT` juste après `scp`.
 
 ## Sécurité
 
-Le rapport contient des informations sensibles sur ton serveur (utilisateurs, ports ouverts, failles). Ne le partage pas et ne le commit pas sur GitHub. Ajoute ceci à
+Le rapport contient des informations sensibles sur ton serveur (utilisateurs, ports ouverts, failles). Ne le partage pas et ne le commit pas sur GitHub. Ajoute ceci à ton `.gitignore` :
+
+```
+rapport_audit.html
+historique/
+```
+
+## Structure du projet
+
+```
+linux-security-auditor/
+├── audit.py          → script principal
+├── template.html     → template du rapport
+├── style.css         → style du rapport
+├── whitelist.json    → admins autorisés
+├── requirements.txt  → dépendances Python (jinja2)
+└── README.md         → ce fichier
+```
+
+Le dossier `historique/` est créé par le script après le premier audit.
