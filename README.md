@@ -8,11 +8,12 @@ Il analyse la machine, génère un rapport HTML et calcule un score de sécurit�
 | Catégorie | Détail |
 |---|---|
 | Utilisateurs et accès | UID 0, mots de passe vides, groupe sudo, connexion SSH root |
-| Réseau | ports dangereux, pare-feu UFW, service Fail2ban |
-| Fichiers sensibles | permissions de `/etc/passwd`, `/etc/shadow`... |
+| Réseau | ports dangereux (FTP, Telnet...), pare-feu UFW, Fail2ban, port SSH par défaut |
+| Fichiers sensibles | permissions de `/etc/passwd`, `/etc/shadow`, `/etc/sudoers`, `sshd_config` |
+| Mises à jour | mises à jour en attente (`apt` ou `yum`) |
+| Brute force SSH | tentatives échouées et top 3 des IPs |
 | Modules de sécurité | AppArmor (Debian/Ubuntu), SELinux (CentOS/RHEL) |
-| Mises à jour | mises à jour de sécurité en attente (`apt` ou `yum`) |
-| Brute force SSH | tentatives de connexion échouées |
+| Logs système | service `rsyslog` ou `journald` actif |
 
 > Le pare-feu vérifié est UFW. La détection de `firewalld` (CentOS, Fedora) sera ajoutée plus tard.
 
@@ -143,12 +144,13 @@ Si SSH n'utilise pas le port 22, ajoute `-P NUMERO_PORT` juste après `scp`.
 
 | Problème | Solution |
 |---|---|
-| `ModuleNotFoundError: No module named 'jinja2'` | Refaire l'installation de `python3-jinja2` (ou `pip3 install jinja2` sur CentOS 7) |
+| `ModuleNotFoundError: No module named 'jinja2'` | Refaire l'installation de `python3-jinja2` (ou `pip3 install jinja2` sur CentOS 7). L'erreur apparaît à la fin de l'audit, au moment de créer le rapport. |
 | `whitelist.json introuvable` | Lancer le script depuis le dossier `linux-security-auditor` |
 | `scp` : `Permission denied` sur le rapport | Sur le serveur : `sudo chown $USER rapport_audit.html` |
 | Résultats incomplets ou « inactif » partout | Lancer avec `sudo` : sans les droits root, plusieurs vérifications échouent |
 | AppArmor ou SELinux signalé « absent » | Normal si ta distribution utilise l'autre module de sécurité |
 | « Pas de pare-feu » sur CentOS/Fedora | Normal : seul UFW est détecté pour l'instant, pas `firewalld` |
+| « Aucun fichier de logs SSH trouvé » | Normal sur une Debian/Ubuntu récente sans `rsyslog` : les logs sont dans `journald` et le test brute force ne les lit pas |
 
 ## Sécurité
 
