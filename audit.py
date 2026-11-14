@@ -263,13 +263,15 @@ def audit_files():
     fichiers_sensibles = {
         "/etc/passwd":          ("644", "root"),
         "/etc/sudoers":         ("440", "root"),
-        "/etc/ssh/sshd_config": ("600", "root"),
     }
 
     if Path("/etc/redhat-release").exists():
         fichiers_sensibles["/etc/shadow"] = ("000", "root")
+        fichiers_sensibles["/etc/ssh/sshd_config"] = ("600", "root")
     else:
         fichiers_sensibles["/etc/shadow"] = ("640", "root")
+        fichiers_sensibles["/etc/ssh/sshd_config"] = ("644", "root")
+
 
     for cheminfichier, (perms_attendue, owner_attendue) in fichiers_sensibles.items():
         p = Path(cheminfichier)
@@ -375,6 +377,7 @@ def audit_ssh_logs():
         resultats.append(Check("Logs SSH", "attention", "Aucun fichier de logs SSH rencontré", 5, 10))
         return resultats
 
+    tentatives = []
     try:
         contenu = Path(log_trouve).read_text(errors="ignore")
         tentatives = [l for l in contenu.splitlines() if "Failed password" in l]
