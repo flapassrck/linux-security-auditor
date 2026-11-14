@@ -17,6 +17,7 @@ import socket
 import datetime
 import json
 import argparse
+import shutil
 from pathlib import Path
 
 #   Couleurs pour le terminal Linux
@@ -197,10 +198,10 @@ def audit_network():
         attention("Impossible d'exécuter 'ss'")
         resultats.append(Check("Port dangereux", "attention", "Impossible d'exécuter 'ss'", 5, 10))
 
-#   Vérification 2 : Statut du pare-feu UFW
-    try:
-        status_ufw = subprocess.check_output(["ufw", "status"], text=True, stderr=subprocess.DEVNULL)
-        if "active" in status_ufw.lower():
+#   Vérification 2 : Pare-feu (UFW ou firewalld)
+    if shutil.which("ufw"):
+        status_ufw = subprocess.run(["ufw", "status"], text=True, capture_output=True).stdout
+        if "status: active" in status_ufw.lower():
             ok("Pare-feu UFW actif")
             resultats.append(Check("Pare-feu UFW", "ok", "UFW actif", 10, 10))
         else:
@@ -211,9 +212,25 @@ def audit_network():
                 0, 10,
                 "Sans pare-feu, toutes les connexions entrantes sont acceptées par défaut. Activer UFW avec : sudo ufw enable puis autoriser SSH pour ne pas perdre l'accès : sudo ufw allow 22/tcp"
             ))
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        attention("UFW non disponible")
-        resultats.append(Check("Pare-feu UFW", "attention", "UFW absent", 5, 10))
+    elif shutil.which("firewall-cmd"):
+        etat = subprocess.run(["systemctl", "is-active", "firewalld"], text=True, capture_output=True).stdout.strip()
+        if etat == "active":
+            ok("Pare-feu firewalld actif")
+            resultats.append(Check("Pare-feu firewalld", "ok", "firewalld actif", 10, 10))
+        else:
+            probleme("Pare-feu firewalld inactif")
+            resultats.append(Check(
+                "Pare-feu firewalld", "probleme",
+                "firewalld inactif",
+                0, 10,
+                "Sans pare-feu, toutes les connexions entrantes sont acceptées par défaut. Activer firewalld avec : sudo systemctl enable --now firewalld"
+            ))
+    else:
+        attention("Aucun pare-feu détecté (UFW ou firewalld)")
+        resultats.append(Check(
+            "Pare-feu", "attention", "Aucun pare-feu détecté", 5, 10,
+            "Installer un pare-feu : sudo apt install ufw -y (Debian/Ubuntu) ou sudo dnf install firewalld -y (CentOS/Fedora)"
+        ))
 
 #   Vérification 3 : fail2ban
     try:
