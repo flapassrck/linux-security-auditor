@@ -8,21 +8,19 @@ Il analyse la machine, génère un rapport HTML et calcule un score de sécurit�
 | Catégorie | Détail |
 |---|---|
 | Utilisateurs et accès | UID 0, mots de passe vides, groupe sudo, connexion SSH root |
-| Réseau | ports dangereux (FTP, Telnet...), pare-feu UFW, Fail2ban, port SSH par défaut |
+| Réseau | ports dangereux (FTP, Telnet...), pare-feu (UFW ou firewalld), Fail2ban, port SSH par défaut |
 | Fichiers sensibles | permissions de `/etc/passwd`, `/etc/shadow`, `/etc/sudoers`, `sshd_config` |
 | Mises à jour | mises à jour en attente (`apt` ou `yum`) |
 | Brute force SSH | tentatives échouées et top 3 des IPs |
 | Modules de sécurité | AppArmor (Debian/Ubuntu), SELinux (CentOS/RHEL) |
 | Logs système | service `rsyslog` ou `journald` actif |
 
-> Le pare-feu vérifié est UFW. La détection de `firewalld` (CentOS, Fedora) sera ajoutée plus tard.
-
 ## Compatibilité
 
 | Famille | Distributions | Statut |
 |---|---|---|
 | Debian | Debian, Ubuntu | Compatible |
-| Red Hat | CentOS, Rocky, Alma, Fedora | Compatible (pare-feu `firewalld` non détecté pour l'instant) |
+| Red Hat | CentOS, Rocky, Alma, Fedora | Compatible |
 | Autres | Arch, openSUSE, Alpine... | Non pris en charge (pas de `apt` ni de `yum`) |
 
 Une distribution avec `systemd` est nécessaire.
@@ -149,32 +147,8 @@ Si SSH n'utilise pas le port 22, ajoute `-P NUMERO_PORT` juste après `scp`.
 | `scp` : `Permission denied` sur le rapport | Sur le serveur : `sudo chown $USER rapport_audit.html` |
 | Résultats incomplets ou « inactif » partout | Lancer avec `sudo` : sans les droits root, plusieurs vérifications échouent |
 | AppArmor ou SELinux signalé « absent » | Normal si ta distribution utilise l'autre module de sécurité |
-| « Pas de pare-feu » sur CentOS/Fedora | Normal : seul UFW est détecté pour l'instant, pas `firewalld` |
 | « Aucun fichier de logs SSH trouvé » | Normal sur une Debian/Ubuntu récente sans `rsyslog` : les logs sont dans `journald` et le test brute force ne les lit pas |
 
 ## Sécurité
 
-Le rapport contient des informations sensibles sur ton serveur (utilisateurs, ports ouverts, failles). Ne le partage pas et ne le commit pas sur GitHub. Ajoute ceci à ton `.gitignore` :
-
-```
-rapport_audit.html
-historique/
-```
-
-## Évolutions prévues
-
-- [ ] Détection du pare-feu `firewalld`
-
-## Structure du projet
-
-```
-linux-security-auditor/
-├── audit.py          → script principal
-├── template.html     → template du rapport
-├── style.css         → style du rapport
-├── whitelist.json    → admins autorisés
-├── requirements.txt  → dépendances Python (jinja2)
-└── README.md         → ce fichier
-```
-
-Le dossier `historique/` est créé par le script après le premier audit.
+Le rapport contient des informations sensibles sur ton serveur (utilisateurs, ports ouverts, failles). Ne le partage pas et ne le commit pas sur GitHub. Ajoute ceci à
